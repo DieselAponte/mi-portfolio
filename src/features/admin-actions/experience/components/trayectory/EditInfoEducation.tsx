@@ -1,5 +1,7 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
+
 interface EditInfoEducationProps {
     data: { titulo: string; descripcion: string; institution: string; obtainedDate: string };
     onChange: (data: EditInfoEducationProps["data"]) => void;
@@ -39,8 +41,9 @@ export const EditInfoEducation = ({ data, onChange, onContinue, onDelete, error 
                 </button>
                 <div className="flex-1" />
                 <button type="button" onClick={onContinue}
-                    className="rounded-lg border border-aperture-blue/50 bg-aperture-blue/10 px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-aperture-blue transition hover:bg-aperture-blue/20 hover:text-white">
-                    Continuar Editando
+                    className="flex items-center gap-2 rounded-lg border border-aperture-blue/50 bg-aperture-blue/10 px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-aperture-blue transition hover:bg-aperture-blue/20 hover:text-white">
+                    <span>Siguiente: Imagen y Tecnologías</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
                 </button>
             </div>
         </div>

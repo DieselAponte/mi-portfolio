@@ -38,7 +38,7 @@ export default function CurrentlyWorkingOn({ data }: { data: ProjectPublication 
 		<section className="grid gap-10 md:grid-cols-[minmax(0,240px)_minmax(0,1fr)] lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
 			<div className="self-start hidden md:block md:sticky md:top-24">
 				<PortalPanel
-					id={data.id.substring(0, 2)}
+					id={String(data.id).padStart(2, "0")}
 					title={data.title}
 					subtitle={data.description}
 					status="IN PROGRESS"

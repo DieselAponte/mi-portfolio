@@ -36,7 +36,7 @@ export default function Experience({ data }: { data: ExperiencePublication[] }) 
 		<section className="grid gap-10 md:grid-cols-[minmax(0,240px)_minmax(0,1fr)] lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
 			<div className="self-start hidden md:block md:sticky md:top-24">
 				<PortalPanel
-					id={activePub.id.substring(0, 2)}
+					id={String(activePub.id).padStart(2, "0")}
 					title={activePub.title}
 					subtitle={activePub.details?.company ?? ""}
 					status="ACTIVE"

@@ -1,7 +1,7 @@
 "use server";
 
 import { getSupabaseClient } from "../../../lib/supabase";
-import { redis } from "../../../lib/redis";
+import { safeRedisGet, safeRedisSet, safeRedisKeys, safeRedisDel } from "../../../lib/redis";
 import type { BlogArticle, BlogSortOrder } from "../types";
 import { checkAdminAuth } from "../../../lib/admin-auth";
 
@@ -39,10 +39,10 @@ const mapRecordToArticle = (record: BlogArticleRecord): BlogArticle => ({
 
 export const fetchArticles = async (query?: BlogQuery): Promise<BlogArticle[]> => {
 	const cacheKey = `${CACHE_KEY_PREFIX}${JSON.stringify(query || {})}`;
-	const cached = await redis.get(cacheKey);
+	const cached = await safeRedisGet(cacheKey);
 
 	if (cached) {
-		return JSON.parse(cached);
+		try { return JSON.parse(cached); } catch {}
 	}
 
 	const client = getSupabaseClient();
@@ -73,47 +73,46 @@ export const fetchArticles = async (query?: BlogQuery): Promise<BlogArticle[]> =
 	const { data, error } = await supabaseQuery;
 
 	if (error) {
-		console.error("Error fetching blog articles:", error);
+		console.error("Error fetching blog articles from Supabase:", error);
 		return [];
 	}
 
 	const articles = (data as BlogArticleRecord[]).map(mapRecordToArticle);
 
-	// Ensure we only cache if there's data to prevent caching empty error states
-    await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(articles));
+	await safeRedisSet(cacheKey, CACHE_TTL, JSON.stringify(articles));
 
 	return articles;
 };
 
 const invalidateBlogCache = async () => {
-    const keys = await redis.keys(`${CACHE_KEY_PREFIX}*`);
-    if (keys.length > 0) {
-        await redis.del(...keys);
-    }
+	const keys = await safeRedisKeys(`${CACHE_KEY_PREFIX}*`);
+	if (keys.length > 0) {
+		await safeRedisDel(...keys);
+	}
 };
 
 export const addArticle = async (article: BlogArticleRecord) => {
-    await checkAdminAuth();
-    const client = getSupabaseClient();
-    const { error } = await client.from("blog_articles").insert(article);
-    if (error) throw new Error(error.message);
-    await invalidateBlogCache();
+	await checkAdminAuth();
+	const client = getSupabaseClient();
+	const { error } = await client.from("blog_articles").insert(article);
+	if (error) throw new Error(error.message);
+	await invalidateBlogCache();
 };
 
 export const updateArticle = async (id: string, updates: Partial<BlogArticleRecord>) => {
-    await checkAdminAuth();
-    const client = getSupabaseClient();
-    const { error } = await client.from("blog_articles").update(updates).eq("id", id);
-    if (error) throw new Error(error.message);
-    await invalidateBlogCache();
+	await checkAdminAuth();
+	const client = getSupabaseClient();
+	const { error } = await client.from("blog_articles").update(updates).eq("id", id);
+	if (error) throw new Error(error.message);
+	await invalidateBlogCache();
 };
 
 export const deleteArticle = async (id: string) => {
-    await checkAdminAuth();
-    const client = getSupabaseClient();
-    const { error } = await client.from("blog_articles").delete().eq("id", id);
-    if (error) throw new Error(error.message);
-    await invalidateBlogCache();
+	await checkAdminAuth();
+	const client = getSupabaseClient();
+	const { error } = await client.from("blog_articles").delete().eq("id", id);
+	if (error) throw new Error(error.message);
+	await invalidateBlogCache();
 };
 
 export const getArticleById = async (id: string): Promise<BlogArticle | null> => {

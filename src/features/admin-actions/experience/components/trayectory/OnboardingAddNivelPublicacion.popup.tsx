@@ -22,17 +22,17 @@ interface OnboardingAddProps {
         type: PublicationType,
         baseData: Record<string, unknown>,
         details: Record<string, unknown>,
-        techIds: string[],
-        topicIds: string[],
+        techIds: (string | number)[],
+        topicIds: (string | number)[],
         imageFile: File | null,
         responsibilities?: string[],
         achievements?: string[],
         onProgress?: (status: "optimizing" | "uploading" | "saving") => void
     ) => Promise<void>;
     onAddTechnology: (name: string) => Promise<void>;
-    onDeleteTechnology: (id: string) => Promise<void>;
+    onDeleteTechnology: (id: string | number) => Promise<void>;
     onAddTopic: (name: string) => Promise<void>;
-    onDeleteTopic: (id: string) => Promise<void>;
+    onDeleteTopic: (id: string | number) => Promise<void>;
     onCancel: () => void;
 }
 
@@ -57,8 +57,8 @@ export const OnboardingAddNivelPublicacion = ({
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [imageDescription, setImageDescription] = useState("");
-    const [selectedTechIds, setSelectedTechIds] = useState<string[]>([]);
-    const [selectedTopicIds, setSelectedTopicIds] = useState<string[]>([]);
+    const [selectedTechIds, setSelectedTechIds] = useState<(string | number)[]>([]);
+    const [selectedTopicIds, setSelectedTopicIds] = useState<(string | number)[]>([]);
 
     // Education state
     const [eduData, setEduData] = useState({ titulo: "", descripcion: "", institution: "", obtainedDate: "" });
@@ -73,11 +73,11 @@ export const OnboardingAddNivelPublicacion = ({
     const [responsibilities, setResponsibilities] = useState(["", "", ""]);
     const [achievements, setAchievements] = useState(["", "", ""]);
 
-    const toggleTech = (id: string) => {
-        setSelectedTechIds((prev) => prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]);
+    const toggleTech = (id: string | number) => {
+        setSelectedTechIds((prev) => prev.some((t) => String(t) === String(id)) ? prev.filter((t) => String(t) !== String(id)) : [...prev, id]);
     };
-    const toggleTopic = (id: string) => {
-        setSelectedTopicIds((prev) => prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]);
+    const toggleTopic = (id: string | number) => {
+        setSelectedTopicIds((prev) => prev.some((t) => String(t) === String(id)) ? prev.filter((t) => String(t) !== String(id)) : [...prev, id]);
     };
     const handleImageChange = (file: File | null, preview: string | null) => {
         setImageFile(file);

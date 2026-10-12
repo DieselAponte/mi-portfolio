@@ -26,13 +26,23 @@ export const CasesOfStudy = ({ cases }: CasesOfStudyProps) => {
               <div className="glass-panel flex flex-col gap-6 rounded-2xl px-6 py-7">
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-sm text-aperture-yellow">
-                    ({item.id})
+                    ({String(item.id).padStart(2, "0")})
                   </span>
                   <span className="h-8 w-8 rounded-full border border-aperture-gray/60" />
                 </div>
-                <div className="flex h-40 items-center justify-center rounded-xl border border-aperture-gray/70 bg-aperture-dark/70 text-[11px] font-mono uppercase tracking-[0.3em] text-zinc-400">
-                  App Demo Image
-                </div>
+                {item.image_url ? (
+                  <div className="relative h-40 w-full overflow-hidden rounded-xl border border-aperture-gray/70 bg-[#0a0a0c]">
+                    <img
+                      src={item.image_url}
+                      alt={item.title}
+                      className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex h-40 items-center justify-center rounded-xl border border-aperture-gray/70 bg-aperture-dark/70 text-[11px] font-mono uppercase tracking-[0.3em] text-zinc-400">
+                    App Demo Image
+                  </div>
+                )}
                 <div className="space-y-3 text-white">
                   <h3 className="text-2xl font-semibold">{item.title}</h3>
                   <p className="text-sm leading-6 text-zinc-300">

@@ -100,7 +100,7 @@ export const ExperienceCRUDContainer = ({
     closePopup();
     router.refresh();
   };
-  const handleUpdateCert = async (id: string, updates: Partial<ExperienceCertification>) => {
+  const handleUpdateCert = async (id: string | number, updates: Partial<ExperienceCertification>) => {
     await updateCertification(id, updates);
     closePopup();
     router.refresh();
@@ -120,7 +120,7 @@ export const ExperienceCRUDContainer = ({
     closePopup();
     router.refresh();
   };
-  const handleUpdateCarousel = async (id: string, updates: Partial<ExperienceCarouselItem>) => {
+  const handleUpdateCarousel = async (id: string | number, updates: Partial<ExperienceCarouselItem>) => {
     await updateCarouselItem(id, updates);
     closePopup();
     router.refresh();
@@ -137,8 +137,8 @@ export const ExperienceCRUDContainer = ({
     type: PublicationType,
     baseData: Record<string, unknown>,
     details: Record<string, unknown>,
-    techIds: string[],
-    topicIds: string[],
+    techIds: (string | number)[],
+    topicIds: (string | number)[],
     imageFile: File | null,
     responsibilities?: string[],
     achievements?: string[],
@@ -175,12 +175,12 @@ export const ExperienceCRUDContainer = ({
   };
 
   const handleUpdatePublicacion = async (
-    id: string,
+    id: string | number,
     type: PublicationType,
     baseData: Record<string, unknown>,
     details: Record<string, unknown>,
-    techIds: string[],
-    topicIds: string[],
+    techIds: (string | number)[],
+    topicIds: (string | number)[],
     imageFile: File | null,
     responsibilities?: string[],
     achievements?: string[],
@@ -208,6 +208,9 @@ export const ExperienceCRUDContainer = ({
     if (onProgress) onProgress("saving");
     try {
       await updatePublicacion(id, type, updatedBase as never, details, techIds, topicIds, responsibilities, achievements);
+      if (newImagePath && baseData.image_path && typeof baseData.image_path === "string" && baseData.image_path !== newImagePath) {
+        await deleteStorageAsset(baseData.image_path).catch(console.error);
+      }
     } catch (error) {
       if (newImagePath) {
         await deleteStorageAsset(newImagePath).catch(console.error);
@@ -229,7 +232,7 @@ export const ExperienceCRUDContainer = ({
     await addTechnology({ name, sector: "Custom" });
     router.refresh();
   };
-  const handleDeleteTech = async (id: string) => {
+  const handleDeleteTech = async (id: string | number) => {
     await deleteServiceTechnology(id);
     router.refresh();
   };
@@ -237,7 +240,7 @@ export const ExperienceCRUDContainer = ({
     await addTopic(name);
     router.refresh();
   };
-  const handleDeleteTopicItem = async (id: string) => {
+  const handleDeleteTopicItem = async (id: string | number) => {
     await deleteServiceTopic(id);
     router.refresh();
   };

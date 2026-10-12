@@ -11,14 +11,14 @@ interface AddPicsAdditionalInfoProjectProps {
     imageFile: File | null;
     imageDescription: string;
     status: ProjectStatus;
-    selectedTechIds: string[];
+    selectedTechIds: (string | number)[];
     technologies: Technology[];
     onImageChange: (file: File | null, preview: string | null) => void;
     onImageDescriptionChange: (desc: string) => void;
     onStatusChange: (status: ProjectStatus) => void;
-    onTechToggle: (id: string) => void;
+    onTechToggle: (id: string | number) => void;
     onAddTechnology: (name: string) => Promise<void>;
-    onDeleteTechnology: (id: string) => Promise<void>;
+    onDeleteTechnology: (id: string | number) => Promise<void>;
     onSubmit: () => void;
     isSubmitting: boolean;
     submitStatus?: "idle" | "optimizing" | "uploading" | "saving";

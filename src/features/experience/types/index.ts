@@ -1,7 +1,7 @@
 export type TrajectoryStatus = "COMPLETED" | "IN PROGRESS" | "ACTIVE";
 
 export interface TrajectoryPanelData {
-	id: string;
+	id: string | number;
 	title: string;
 	subtitle: string;
 	status: TrajectoryStatus;
@@ -15,7 +15,7 @@ export interface TrajectorySectionData extends TrajectoryPanelData {
 }
 
 export interface TechBubble {
-	id: string;
+	id: string | number;
 	label: string;
 	top: string;
 	right: string;
@@ -24,7 +24,7 @@ export interface TechBubble {
 }
 
 export interface ExperienceSlide {
-	id: string;
+	id: string | number;
 	role: string;
 	organization: string;
 	timeframe: string;
@@ -33,7 +33,7 @@ export interface ExperienceSlide {
 }
 
 export interface ExperienceCertification {
-	id: string;
+	id: string | number;
 	title: string;
 	meta: string;
 	url?: string;
@@ -41,7 +41,7 @@ export interface ExperienceCertification {
 }
 
 export interface ExperienceCarouselItem {
-	id: string;
+	id: string | number;
 	title: string;
 	subtitle: string;
 	image_path: string;
@@ -65,7 +65,7 @@ export enum ProjectStatus {
 }
 
 export interface Technology {
-	id: string;
+	id: string | number;
 	name: string;
 	icon?: string;
 	sector: string;
@@ -73,13 +73,13 @@ export interface Technology {
 }
 
 export interface Topic {
-	id: string;
+	id: string | number;
 	name: string;
 	is_predefined: boolean;
 }
 
 export interface NivelPublicacion {
-	id: string;
+	id: string | number;
 	title: string;
 	description: string;
 	image_path: string;
@@ -91,16 +91,16 @@ export interface NivelPublicacion {
 }
 
 export interface EducationDetails {
-	id: string;
-	publicacion_id: string;
+	id?: string | number;
+	publicacion_id?: string | number;
 	institution: string;
 	obtained_date: string;
 	skills_learned: string[];
 }
 
 export interface ProjectDetails {
-	id: string;
-	publicacion_id: string;
+	id?: string | number;
+	publicacion_id?: string | number;
 	why_i_built_this: string;
 	how_it_works: string;
 	what_i_learned: string[];
@@ -109,21 +109,21 @@ export interface ProjectDetails {
 }
 
 export interface ProfessionalExpDetails {
-	id: string;
-	publicacion_id: string;
+	id?: string | number;
+	publicacion_id?: string | number;
 	company: string;
 }
 
 export interface PublicationResponsibility {
-	id: string;
-	publicacion_id: string;
+	id?: string | number;
+	publicacion_id?: string | number;
 	content: string;
 	order_index: number;
 }
 
 export interface PublicationAchievement {
-	id: string;
-	publicacion_id: string;
+	id?: string | number;
+	publicacion_id?: string | number;
 	content: string;
 	order_index: number;
 }

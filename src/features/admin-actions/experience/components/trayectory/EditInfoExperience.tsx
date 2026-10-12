@@ -1,5 +1,7 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
+
 interface EditInfoExperienceProps {
     data: { titulo: string; descripcion: string; company: string };
     onChange: (data: EditInfoExperienceProps["data"]) => void;
@@ -30,7 +32,10 @@ export const EditInfoExperience = ({ data, onChange, onContinue, onDelete, error
             <div className="flex gap-3 pt-2">
                 <button type="button" onClick={onDelete} className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-red-400 transition hover:bg-red-500/20">Eliminar</button>
                 <div className="flex-1" />
-                <button type="button" onClick={onContinue} className="rounded-lg border border-aperture-blue/50 bg-aperture-blue/10 px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-aperture-blue transition hover:bg-aperture-blue/20 hover:text-white">Continuar Editando</button>
+                <button type="button" onClick={onContinue} className="flex items-center gap-2 rounded-lg border border-aperture-blue/50 bg-aperture-blue/10 px-6 py-2.5 font-mono text-xs uppercase tracking-[0.2em] text-aperture-blue transition hover:bg-aperture-blue/20 hover:text-white">
+                    <span>Siguiente: Imagen y Tecnologías</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                </button>
             </div>
         </div>
     );

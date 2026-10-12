@@ -1,7 +1,7 @@
 "use server";
 
 import { getSupabaseClient } from "../../../lib/supabase";
-import { redis } from "../../../lib/redis";
+import { safeRedisGet, safeRedisSet, safeRedisKeys, safeRedisDel } from "../../../lib/redis";
 import { checkAdminAuth } from "../../../lib/admin-auth";
 import { deleteStorageAsset } from "../../../app/actions/storage-actions";
 import type {
@@ -26,9 +26,9 @@ const CACHE_KEY_TOPICS = "trayectory_topics";
 const CACHE_TTL = 3600;
 
 const invalidateTrayectoryCache = async () => {
-    const keys = await redis.keys("trayectory_*");
+    const keys = await safeRedisKeys("trayectory_*");
     if (keys.length > 0) {
-        await redis.del(...keys);
+        await safeRedisDel(...keys);
     }
 };
 
@@ -37,8 +37,10 @@ const invalidateTrayectoryCache = async () => {
 // =============================================================================
 
 export const fetchTechnologies = async (): Promise<Technology[]> => {
-    const cached = await redis.get(CACHE_KEY_TECHNOLOGIES);
-    if (cached) return JSON.parse(cached);
+    const cached = await safeRedisGet(CACHE_KEY_TECHNOLOGIES);
+    if (cached) {
+        try { return JSON.parse(cached); } catch {}
+    }
 
     const client = getSupabaseClient();
     const { data, error } = await client
@@ -48,11 +50,11 @@ export const fetchTechnologies = async (): Promise<Technology[]> => {
         .order("name", { ascending: true });
 
     if (error) {
-        console.error("Error fetching technologies:", error);
+        console.error("Error fetching technologies from Supabase:", error);
         return [];
     }
 
-    await redis.setex(CACHE_KEY_TECHNOLOGIES, CACHE_TTL, JSON.stringify(data));
+    await safeRedisSet(CACHE_KEY_TECHNOLOGIES, CACHE_TTL, JSON.stringify(data));
     return data as Technology[];
 };
 
@@ -69,7 +71,7 @@ export const addTechnology = async (tech: { name: string; icon?: string; sector:
     return data as Technology;
 };
 
-export const deleteTechnology = async (id: string) => {
+export const deleteTechnology = async (id: string | number) => {
     await checkAdminAuth();
     const client = getSupabaseClient();
     const { error } = await client.from("technologies").delete().eq("id", id);
@@ -82,8 +84,10 @@ export const deleteTechnology = async (id: string) => {
 // =============================================================================
 
 export const fetchTopics = async (): Promise<Topic[]> => {
-    const cached = await redis.get(CACHE_KEY_TOPICS);
-    if (cached) return JSON.parse(cached);
+    const cached = await safeRedisGet(CACHE_KEY_TOPICS);
+    if (cached) {
+        try { return JSON.parse(cached); } catch {}
+    }
 
     const client = getSupabaseClient();
     const { data, error } = await client
@@ -92,11 +96,11 @@ export const fetchTopics = async (): Promise<Topic[]> => {
         .order("name", { ascending: true });
 
     if (error) {
-        console.error("Error fetching topics:", error);
+        console.error("Error fetching topics from Supabase:", error);
         return [];
     }
 
-    await redis.setex(CACHE_KEY_TOPICS, CACHE_TTL, JSON.stringify(data));
+    await safeRedisSet(CACHE_KEY_TOPICS, CACHE_TTL, JSON.stringify(data));
     return data as Topic[];
 };
 
@@ -113,7 +117,7 @@ export const addTopic = async (name: string) => {
     return data as Topic;
 };
 
-export const deleteTopic = async (id: string) => {
+export const deleteTopic = async (id: string | number) => {
     await checkAdminAuth();
     const client = getSupabaseClient();
     const { error } = await client.from("topics").delete().eq("id", id);
@@ -126,8 +130,10 @@ export const deleteTopic = async (id: string) => {
 // =============================================================================
 
 export const fetchPublicaciones = async (): Promise<FullPublication[]> => {
-    const cached = await redis.get(CACHE_KEY_PUBLICATIONS);
-    if (cached) return JSON.parse(cached);
+    const cached = await safeRedisGet(CACHE_KEY_PUBLICATIONS);
+    if (cached) {
+        try { return JSON.parse(cached); } catch {}
+    }
 
     const client = getSupabaseClient();
 
@@ -169,40 +175,41 @@ export const fetchPublicaciones = async (): Promise<FullPublication[]> => {
     const topicMap = new Map<string, Topic[]>();
 
     (techJunctions ?? []).forEach((j: Record<string, unknown>) => {
-        const pubId = j.publicacion_id as string;
+        const pubId = String(j.publicacion_id);
         if (!techMap.has(pubId)) techMap.set(pubId, []);
         if (j.technologies) techMap.get(pubId)!.push(j.technologies as Technology);
     });
 
     (topicJunctions ?? []).forEach((j: Record<string, unknown>) => {
-        const pubId = j.publicacion_id as string;
+        const pubId = String(j.publicacion_id);
         if (!topicMap.has(pubId)) topicMap.set(pubId, []);
         if (j.topics) topicMap.get(pubId)!.push(j.topics as Topic);
     });
 
     // Assemble full publications
     const result: FullPublication[] = pubs.map((pub: NivelPublicacion) => {
+        const key = String(pub.id);
         const base = {
             ...pub,
-            technologies: techMap.get(pub.id) ?? [],
-            topics: topicMap.get(pub.id) ?? [],
+            technologies: techMap.get(key) ?? [],
+            topics: topicMap.get(key) ?? [],
         };
 
         if (pub.type === "EDUCATION") {
-            const detail = (eduDetails ?? []).find((d: EducationDetails) => d.publicacion_id === pub.id);
+            const detail = (eduDetails ?? []).find((d: EducationDetails) => String(d.publicacion_id) === key);
             return { ...base, details: detail ?? {} } as EducationPublication;
         }
         if (pub.type === "PROJECT") {
-            const detail = (projDetails ?? []).find((d: ProjectDetails) => d.publicacion_id === pub.id);
+            const detail = (projDetails ?? []).find((d: ProjectDetails) => String(d.publicacion_id) === key);
             return { ...base, details: detail ?? {} } as ProjectPublication;
         }
         // EXPERIENCE
-        const detail = (expDetails ?? []).find((d: ProfessionalExpDetails) => d.publicacion_id === pub.id);
+        const detail = (expDetails ?? []).find((d: ProfessionalExpDetails) => String(d.publicacion_id) === key);
         const pubResponsibilities = (responsibilities ?? []).filter(
-            (r: PublicationResponsibility) => r.publicacion_id === pub.id
+            (r: PublicationResponsibility) => String(r.publicacion_id) === key
         );
         const pubAchievements = (achievements ?? []).filter(
-            (a: PublicationAchievement) => a.publicacion_id === pub.id
+            (a: PublicationAchievement) => String(a.publicacion_id) === key
         );
         return {
             ...base,
@@ -212,7 +219,7 @@ export const fetchPublicaciones = async (): Promise<FullPublication[]> => {
         } as ExperiencePublication;
     });
 
-    await redis.setex(CACHE_KEY_PUBLICATIONS, CACHE_TTL, JSON.stringify(result));
+    await safeRedisSet(CACHE_KEY_PUBLICATIONS, CACHE_TTL, JSON.stringify(result));
     return result;
 };
 
@@ -220,8 +227,8 @@ export const addPublicacion = async (
     type: PublicationType,
     baseData: Omit<NivelPublicacion, "id" | "technologies" | "topics">,
     details: Record<string, unknown>,
-    techIds: string[],
-    topicIds: string[],
+    techIds: (string | number)[],
+    topicIds: (string | number)[],
     responsibilities?: string[],
     achievements?: string[],
 ) => {
@@ -289,12 +296,12 @@ export const addPublicacion = async (
 };
 
 export const updatePublicacion = async (
-    id: string,
+    id: string | number,
     type: PublicationType,
     baseData: Partial<NivelPublicacion>,
     details: Record<string, unknown>,
-    techIds: string[],
-    topicIds: string[],
+    techIds: (string | number)[],
+    topicIds: (string | number)[],
     responsibilities?: string[],
     achievements?: string[],
 ) => {
@@ -367,7 +374,7 @@ export const updatePublicacion = async (
     await invalidateTrayectoryCache();
 };
 
-export const deletePublicacion = async (id: string, imagePath?: string) => {
+export const deletePublicacion = async (id: string | number, imagePath?: string) => {
     await checkAdminAuth();
     const client = getSupabaseClient();
 

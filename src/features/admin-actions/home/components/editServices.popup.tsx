@@ -6,7 +6,7 @@ import type { HomeService } from "../../../home/types";
 
 interface EditServicesPopupProps {
   service: HomeService;
-  onSave: (id: string, updates: Partial<HomeService>) => Promise<void>;
+  onSave: (id: string | number, updates: Partial<HomeService>) => Promise<void>;
   onDelete: () => void;
   onCancel: () => void;
 }

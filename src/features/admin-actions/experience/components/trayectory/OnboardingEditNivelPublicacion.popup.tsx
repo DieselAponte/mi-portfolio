@@ -18,12 +18,12 @@ interface OnboardingEditProps {
     technologies: Technology[];
     topics: Topic[];
     onSave: (
-        id: string,
+        id: string | number,
         type: PublicationType,
         baseData: Record<string, unknown>,
         details: Record<string, unknown>,
-        techIds: string[],
-        topicIds: string[],
+        techIds: (string | number)[],
+        topicIds: (string | number)[],
         imageFile: File | null,
         responsibilities?: string[],
         achievements?: string[],
@@ -31,9 +31,9 @@ interface OnboardingEditProps {
     ) => Promise<void>;
     onDelete: () => void;
     onAddTechnology: (name: string) => Promise<void>;
-    onDeleteTechnology: (id: string) => Promise<void>;
+    onDeleteTechnology: (id: string | number) => Promise<void>;
     onAddTopic: (name: string) => Promise<void>;
-    onDeleteTopic: (id: string) => Promise<void>;
+    onDeleteTopic: (id: string | number) => Promise<void>;
     onCancel: () => void;
 }
 
@@ -58,10 +58,10 @@ export const OnboardingEditNivelPublicacion = ({
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(publication.image_path || null);
     const [imageDescription, setImageDescription] = useState(publication.image_description || "");
-    const [selectedTechIds, setSelectedTechIds] = useState<string[]>(
+    const [selectedTechIds, setSelectedTechIds] = useState<(string | number)[]>(
         (publication.technologies ?? []).map((t: any) => t.id)
     );
-    const [selectedTopicIds, setSelectedTopicIds] = useState<string[]>(
+    const [selectedTopicIds, setSelectedTopicIds] = useState<(string | number)[]>(
         (publication.topics ?? []).map((t: any) => t.id)
     );
 
@@ -105,8 +105,8 @@ export const OnboardingEditNivelPublicacion = ({
         expPub?.achievements?.map((a: any) => a.content) ?? ["", "", ""]
     );
 
-    const toggleTech = (id: string) => setSelectedTechIds((p) => p.includes(id) ? p.filter((t) => t !== id) : [...p, id]);
-    const toggleTopic = (id: string) => setSelectedTopicIds((p) => p.includes(id) ? p.filter((t) => t !== id) : [...p, id]);
+    const toggleTech = (id: string | number) => setSelectedTechIds((p) => p.some((t) => String(t) === String(id)) ? p.filter((t) => String(t) !== String(id)) : [...p, id]);
+    const toggleTopic = (id: string | number) => setSelectedTopicIds((p) => p.some((t) => String(t) === String(id)) ? p.filter((t) => String(t) !== String(id)) : [...p, id]);
     const handleImageChange = (file: File | null, preview: string | null) => { setImageFile(file); setImagePreview(preview); };
 
     const handleStep1Continue = () => {
@@ -130,21 +130,21 @@ export const OnboardingEditNivelPublicacion = ({
             const type = publication.type;
             if (type === PublicationType.EDUCATION) {
                 await onSave(publication.id, type,
-                    { title: eduData.titulo.trim(), description: eduData.descripcion.trim(), image_description: imageDescription.trim() },
+                    { title: eduData.titulo.trim(), description: eduData.descripcion.trim(), image_description: imageDescription.trim(), image_path: publication.image_path },
                     { institution: eduData.institution.trim(), obtained_date: eduData.obtainedDate, skills_learned: skillsLearned.filter((s: string) => s.trim()) },
                     selectedTechIds, selectedTopicIds, imageFile,
                     undefined, undefined, setSubmitStatus
                 );
             } else if (type === PublicationType.PROJECT) {
                 await onSave(publication.id, type,
-                    { title: projData.titulo.trim(), description: projData.descripcion.trim(), image_description: imageDescription.trim() },
+                    { title: projData.titulo.trim(), description: projData.descripcion.trim(), image_description: imageDescription.trim(), image_path: publication.image_path },
                     { why_i_built_this: projData.whyIBuiltThis.trim(), how_it_works: projData.howItWorks.trim(), what_i_learned: projData.whatILearned.filter((s: string) => s.trim()), url_repository: projData.urlRepository.trim(), status: projStatus },
                     selectedTechIds, [], imageFile,
                     undefined, undefined, setSubmitStatus
                 );
             } else {
                 await onSave(publication.id, type,
-                    { title: expData.titulo.trim(), description: expData.descripcion.trim(), image_description: imageDescription.trim() },
+                    { title: expData.titulo.trim(), description: expData.descripcion.trim(), image_description: imageDescription.trim(), image_path: publication.image_path },
                     { company: expData.company.trim() },
                     selectedTechIds, [], imageFile,
                     responsibilities.filter((s: string) => s.trim()),
@@ -168,9 +168,43 @@ export const OnboardingEditNivelPublicacion = ({
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
             <div className="glass-panel relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl px-8 py-8">
-                <div className="mb-6 flex items-center justify-between">
+                <div className="mb-4 flex items-center justify-between">
                     <h3 className="font-mono text-sm uppercase tracking-[0.2em] text-aperture-yellow">{getTitle()}</h3>
                     <button onClick={onCancel} className="text-zinc-400 transition hover:text-white"><X className="h-5 w-5" /></button>
+                </div>
+
+                {/* Step Tabs Navigation */}
+                <div className="mb-6 flex items-center gap-2 border-b border-aperture-gray/40 pb-3">
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setError("");
+                            setStep("step1");
+                        }}
+                        className={`flex items-center gap-2 rounded-lg px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.2em] transition ${
+                            step === "step1"
+                                ? "border border-aperture-blue/50 bg-aperture-blue/15 text-aperture-blue shadow-sm shadow-aperture-blue/20"
+                                : "text-zinc-500 hover:text-zinc-300"
+                        }`}
+                    >
+                        <span>[01]</span>
+                        <span>Información Básica</span>
+                    </button>
+                    <span className="text-zinc-600">//</span>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            handleStep1Continue();
+                        }}
+                        className={`flex items-center gap-2 rounded-lg px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.2em] transition ${
+                            step === "step2"
+                                ? "border border-aperture-blue/50 bg-aperture-blue/15 text-aperture-blue shadow-sm shadow-aperture-blue/20"
+                                : "text-zinc-500 hover:text-zinc-300"
+                        }`}
+                    >
+                        <span>[02]</span>
+                        <span>Imagen y Tecnologías</span>
+                    </button>
                 </div>
 
                 {/* Education */}

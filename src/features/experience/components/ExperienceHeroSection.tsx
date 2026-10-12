@@ -40,7 +40,7 @@ const AutoCarousel = ({ items }: { items: ExperienceCarouselItem[] }) => {
 						<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 						<div className="absolute bottom-4 left-4 right-4 space-y-1">
 							<p className="text-[10px] font-mono uppercase tracking-[0.35em] text-aperture-yellow">
-								Log {item.id.substring(0, 2)}
+								Log {String(item.id).padStart(2, "0")}
 							</p>
 							<p className="text-sm font-semibold text-[#f0f0f0]">
 								{item.title}

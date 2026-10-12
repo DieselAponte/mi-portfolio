@@ -79,8 +79,7 @@ export const useWheatleyTracking = ({
 
 		if (eyeAim) {
 			const targetY = pointer.x * eyeYaw;
-			const verticalSign = pointer.x >= 0 ? -1 : 1;
-			const targetX = -pointer.y * eyePitch * verticalSign;
+			const targetX = -pointer.y * eyePitch;
 			eyeAim.rotation.y = MathUtils.lerp(eyeAim.rotation.y, targetY, lerp);
 			eyeAim.rotation.x = MathUtils.lerp(eyeAim.rotation.x, targetX, lerp);
 		}

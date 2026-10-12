@@ -23,6 +23,11 @@ import {
   updateCaseOfStudy,
   deleteCaseOfStudy,
 } from "../../home/services/home.service";
+import { optimizeImage } from "../../../lib/utils/image-optimizer";
+import {
+  uploadStorageAsset,
+  deleteStorageAsset,
+} from "../../../app/actions/storage-actions";
 
 type PopupState =
   | { type: "none" }
@@ -78,7 +83,7 @@ export const HomeCRUDContainer = ({
   };
 
   const handleUpdateService = async (
-    id: string,
+    id: string | number,
     updates: Partial<HomeService>
   ) => {
     await updateHomeService(id, updates);
@@ -93,28 +98,118 @@ export const HomeCRUDContainer = ({
   };
 
   // --- Case Handlers ---
-  const handleAddCase = async (data: {
-    title: string;
-    description: string;
-    tags: string[];
-    order_index: number;
-  }) => {
-    await addCaseOfStudy(data as HomeCaseOfStudy);
+  const handleAddCase = async (
+    data: {
+      title: string;
+      description: string;
+      tags: string[];
+      order_index: number;
+    },
+    imageFile: File | null
+  ) => {
+    let imageUrl = "";
+    if (imageFile) {
+      const optimizedFile = await optimizeImage(imageFile, {
+        maxWidth: 1200,
+        maxHeight: 1200,
+        quality: 0.8,
+      });
+      const formData = new FormData();
+      formData.append("file", optimizedFile);
+      formData.append("folder", "cases");
+      const hash = Math.random().toString(36).substring(2, 8);
+      const name = data.title
+        ? String(data.title).toLowerCase().replace(/[^a-z0-9]+/g, "-")
+        : "case";
+      formData.append(
+        "filename",
+        `${name}-${hash}.${optimizedFile.name.split(".").pop()}`
+      );
+
+      imageUrl = await uploadStorageAsset(formData);
+    }
+
+    try {
+      await addCaseOfStudy({
+        ...data,
+        image_url: imageUrl,
+      } as HomeCaseOfStudy);
+    } catch (error) {
+      if (imageUrl) {
+        await deleteStorageAsset(imageUrl).catch(console.error);
+      }
+      throw error;
+    }
+
     closePopup();
     router.refresh();
   };
 
   const handleUpdateCase = async (
-    id: string,
-    updates: Partial<HomeCaseOfStudy>
+    id: string | number,
+    updates: Partial<HomeCaseOfStudy>,
+    imageFile?: File | null
   ) => {
-    await updateCaseOfStudy(id, updates);
+    let updatedData = { ...updates };
+    let newImageUrl = "";
+    const currentCase = casesOfStudy.find((c) => String(c.id) === String(id));
+
+    if (imageFile) {
+      const optimizedFile = await optimizeImage(imageFile, {
+        maxWidth: 1200,
+        maxHeight: 1200,
+        quality: 0.8,
+      });
+      const formData = new FormData();
+      formData.append("file", optimizedFile);
+      formData.append("folder", "cases");
+      const hash = Math.random().toString(36).substring(2, 8);
+      const name =
+        updates.title || currentCase?.title
+          ? String(updates.title || currentCase?.title)
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")
+          : "case";
+      formData.append(
+        "filename",
+        `${name}-${hash}.${optimizedFile.name.split(".").pop()}`
+      );
+
+      newImageUrl = await uploadStorageAsset(formData);
+      updatedData = { ...updatedData, image_url: newImageUrl };
+    }
+
+    try {
+      await updateCaseOfStudy(id, updatedData);
+
+      // If a new image was uploaded and previous one existed, delete old one
+      if (
+        newImageUrl &&
+        currentCase?.image_url &&
+        currentCase.image_url !== newImageUrl
+      ) {
+        await deleteStorageAsset(currentCase.image_url).catch(console.error);
+      }
+      // If image was explicitly cleared (empty string), delete old image
+      if (updatedData.image_url === "" && currentCase?.image_url) {
+        await deleteStorageAsset(currentCase.image_url).catch(console.error);
+      }
+    } catch (error) {
+      if (newImageUrl) {
+        await deleteStorageAsset(newImageUrl).catch(console.error);
+      }
+      throw error;
+    }
+
     closePopup();
     router.refresh();
   };
 
   const handleDeleteCase = async (caseItem: HomeCaseOfStudy) => {
     await deleteCaseOfStudy(caseItem.id);
+    if (caseItem.image_url) {
+      await deleteStorageAsset(caseItem.image_url).catch(console.error);
+    }
     closePopup();
     router.refresh();
   };

@@ -6,7 +6,7 @@ import type { ExperienceCarouselItem } from "../../../experience/types";
 
 interface EditItemsCarouselPopupProps {
   item: ExperienceCarouselItem;
-  onSave: (id: string, updates: Partial<ExperienceCarouselItem>) => Promise<void>;
+  onSave: (id: string | number, updates: Partial<ExperienceCarouselItem>) => Promise<void>;
   onUploadImage: (file: File) => Promise<string>;
   onDelete: () => void;
   onCancel: () => void;

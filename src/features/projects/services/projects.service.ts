@@ -1,12 +1,12 @@
 "use server";
 
 import { getSupabaseClient } from "../../../lib/supabase";
-import { redis } from "../../../lib/redis";
+import { safeRedisGet, safeRedisSet, safeRedisKeys, safeRedisDel } from "../../../lib/redis";
 import type { Project } from "../types";
 import { checkAdminAuth } from "../../../lib/admin-auth";
 
 export type ProjectRecord = {
-	id: string;
+	id: string | number;
 	title: string;
 	description: string;
 	date: string;
@@ -36,10 +36,14 @@ const mapRecordToProject = (record: ProjectRecord): Project => ({
 
 export const fetchProjects = async (query?: ProjectsQuery): Promise<Project[]> => {
 	const cacheKey = `${CACHE_KEY_PREFIX}${JSON.stringify(query || {})}`;
-	const cached = await redis.get(cacheKey);
+	const cached = await safeRedisGet(cacheKey);
 
 	if (cached) {
-		return JSON.parse(cached);
+		try {
+			return JSON.parse(cached);
+		} catch {
+			// si el json está corrupto, continúa a DB
+		}
 	}
 
 	const client = getSupabaseClient();
@@ -49,7 +53,6 @@ export const fetchProjects = async (query?: ProjectsQuery): Promise<Project[]> =
 		supabaseQuery = supabaseQuery.limit(query.limit);
 	}
 	if (query?.offset) {
-        // approximate offset with range for simpler pagination
 		supabaseQuery = supabaseQuery.range(query.offset, query.offset + (query.limit || 4) - 1);
 	}
 	if (query?.techStack && query.techStack.length > 0) {
@@ -59,44 +62,45 @@ export const fetchProjects = async (query?: ProjectsQuery): Promise<Project[]> =
 	const { data, error } = await supabaseQuery;
 
 	if (error) {
-		console.error("Error fetching projects:", error);
+		console.error("Error fetching projects from Supabase:", error);
 		return [];
 	}
 
 	const projects = (data as ProjectRecord[]).map(mapRecordToProject);
 
-    await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(projects));
+	await safeRedisSet(cacheKey, CACHE_TTL, JSON.stringify(projects));
 
 	return projects;
 };
 
 const invalidateProjectsCache = async () => {
-    const keys = await redis.keys(`${CACHE_KEY_PREFIX}*`);
-    if (keys.length > 0) {
-        await redis.del(...keys);
-    }
+	const keys = await safeRedisKeys(`${CACHE_KEY_PREFIX}*`);
+	if (keys.length > 0) {
+		await safeRedisDel(...keys);
+	}
 };
 
-export const addProject = async (project: ProjectRecord) => {
-    await checkAdminAuth();
-    const client = getSupabaseClient();
-    const { error } = await client.from("projects").insert(project);
-    if (error) throw new Error(error.message);
-    await invalidateProjectsCache();
+export const addProject = async (project: Omit<ProjectRecord, "id"> & { id?: string | number }) => {
+	await checkAdminAuth();
+	const client = getSupabaseClient();
+	const { error } = await client.from("projects").insert(project);
+	if (error) throw new Error(error.message);
+	await invalidateProjectsCache();
 };
 
-export const updateProject = async (id: string, updates: Partial<ProjectRecord>) => {
-    await checkAdminAuth();
-    const client = getSupabaseClient();
-    const { error } = await client.from("projects").update(updates).eq("id", id);
-    if (error) throw new Error(error.message);
-    await invalidateProjectsCache();
+export const updateProject = async (id: string | number, updates: Partial<ProjectRecord>) => {
+	await checkAdminAuth();
+	const client = getSupabaseClient();
+	const { error } = await client.from("projects").update(updates).eq("id", id);
+	if (error) throw new Error(error.message);
+	await invalidateProjectsCache();
 };
 
-export const deleteProject = async (id: string) => {
-    await checkAdminAuth();
-    const client = getSupabaseClient();
-    const { error } = await client.from("projects").delete().eq("id", id);
-    if (error) throw new Error(error.message);
-    await invalidateProjectsCache();
+export const deleteProject = async (id: string | number) => {
+	await checkAdminAuth();
+	const client = getSupabaseClient();
+	const { error } = await client.from("projects").delete().eq("id", id);
+	if (error) throw new Error(error.message);
+	await invalidateProjectsCache();
 };
+

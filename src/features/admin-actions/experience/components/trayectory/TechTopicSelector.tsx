@@ -7,10 +7,10 @@ import type { Technology, Topic } from "../../../../experience/types";
 interface TechTopicSelectorProps {
     label: string;
     items: (Technology | Topic)[];
-    selectedIds: string[];
-    onToggle: (id: string) => void;
+    selectedIds: (string | number)[];
+    onToggle: (id: string | number) => void;
     onAdd: (name: string) => Promise<void>;
-    onDelete: (id: string) => Promise<void>;
+    onDelete: (id: string | number) => Promise<void>;
     type: "technology" | "topic";
 }
 
@@ -41,7 +41,7 @@ export const TechTopicSelector = ({
         }
     };
 
-    const handleDelete = async (id: string, e: React.MouseEvent) => {
+    const handleDelete = async (id: string | number, e: React.MouseEvent) => {
         e.stopPropagation();
         try {
             await onDelete(id);
@@ -95,7 +95,7 @@ export const TechTopicSelector = ({
 
             <div className="flex flex-wrap gap-2">
                 {items.map((item) => {
-                    const isSelected = selectedIds.includes(item.id);
+                    const isSelected = selectedIds.some((sId) => String(sId) === String(item.id));
                     const isPredefined = "is_predefined" in item && item.is_predefined;
                     return (
                         <button

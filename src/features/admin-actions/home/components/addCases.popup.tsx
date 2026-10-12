@@ -1,15 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import { X, Plus } from "lucide-react";
+import { useState, useRef } from "react";
+import { X, Plus, Upload } from "lucide-react";
 
 interface AddCasesPopupProps {
-  onAdd: (data: {
-    title: string;
-    description: string;
-    tags: string[];
-    order_index: number;
-  }) => Promise<void>;
+  onAdd: (
+    data: {
+      title: string;
+      description: string;
+      tags: string[];
+      order_index: number;
+    },
+    imageFile: File | null
+  ) => Promise<void>;
   onCancel: () => void;
   currentCount: number;
 }
@@ -23,8 +26,26 @@ export const AddCasesPopup = ({
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const validTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp", "image/svg+xml"];
+    if (!validTypes.includes(file.type)) {
+      setError("Formato no compatible. Usa PNG, JPG, WEBP o SVG.");
+      return;
+    }
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setImagePreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+    setError("");
+  };
 
   const addTag = () => {
     const trimmed = tagInput.trim();
@@ -66,12 +87,15 @@ export const AddCasesPopup = ({
     setIsSaving(true);
     setError("");
     try {
-      await onAdd({
-        title: title.trim(),
-        description: description.trim(),
-        tags,
-        order_index: currentCount + 1,
-      });
+      await onAdd(
+        {
+          title: title.trim(),
+          description: description.trim(),
+          tags,
+          order_index: currentCount + 1,
+        },
+        imageFile
+      );
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Error al añadir caso de estudio."
@@ -130,6 +154,44 @@ export const AddCasesPopup = ({
               placeholder="Breve descripción del caso de estudio..."
               className="w-full resize-none rounded-lg border border-aperture-gray bg-aperture-dark/80 px-4 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition focus:border-aperture-blue/60"
             />
+          </div>
+
+          {/* Image */}
+          <div>
+            <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
+              Imagen del Proyecto (Opcional)
+            </label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".png,.jpeg,.jpg,.webp,.svg"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            {imagePreview ? (
+              <div className="relative overflow-hidden rounded-xl border border-aperture-gray/50 bg-[#0a0a0c]">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="h-36 w-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="absolute bottom-2 right-2 rounded-lg bg-black/70 px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.2em] text-white transition hover:bg-black/90"
+                >
+                  <Upload className="mr-1 inline h-3 w-3" /> Cambiar
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-aperture-gray/50 bg-aperture-dark/40 py-8 font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 transition hover:border-aperture-blue/40 hover:text-aperture-blue"
+              >
+                <Upload className="h-4 w-4" /> Seleccionar imagen
+              </button>
+            )}
           </div>
 
           {/* Tags */}

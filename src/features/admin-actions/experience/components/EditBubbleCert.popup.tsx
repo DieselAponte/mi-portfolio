@@ -6,7 +6,7 @@ import type { ExperienceCertification } from "../../../experience/types";
 
 interface EditBubbleCertPopupProps {
   cert: ExperienceCertification;
-  onSave: (id: string, updates: Partial<ExperienceCertification>) => Promise<void>;
+  onSave: (id: string | number, updates: Partial<ExperienceCertification>) => Promise<void>;
   onDelete: () => void;
   onCancel: () => void;
 }
