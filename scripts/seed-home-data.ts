@@ -87,7 +87,7 @@ async function seed() {
   const { error: deleteServicesError } = await supabase
     .from("home_services")
     .delete()
-    .neq("id", "00000000-0000-0000-0000-000000000000"); // Delete all rows
+    .gt("id", 0); // Delete all rows
 
   if (deleteServicesError) {
     console.error("  ⚠ Error clearing services:", deleteServicesError.message);
@@ -113,7 +113,7 @@ async function seed() {
   const { error: deleteCasesError } = await supabase
     .from("home_cases_of_study")
     .delete()
-    .neq("id", "00000000-0000-0000-0000-000000000000");
+    .gt("id", 0);
 
   if (deleteCasesError) {
     console.error(

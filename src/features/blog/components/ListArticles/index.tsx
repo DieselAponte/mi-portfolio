@@ -25,7 +25,7 @@ export const ListArticles = ({ articles }: ListArticlesProps) => {
 	if (articles.length === 0) {
 		return (
 			<section className="rounded-2xl border border-aperture-gray/60 bg-aperture-dark/40 px-6 py-8 text-center">
-				<p className="text-sm text-zinc-400">No articles available.</p>
+				<p className="text-sm text-zinc-400">Actualmente no hay artículos disponibles que coincidan con la sección o los filtros activos.</p>
 			</section>
 		);
 	}

@@ -4,6 +4,7 @@ import { getSupabaseClient } from "../../../lib/supabase";
 import { safeRedisGet, safeRedisSet, safeRedisKeys, safeRedisDel } from "../../../lib/redis";
 import { checkAdminAuth } from "../../../lib/admin-auth";
 import { deleteStorageAsset } from "../../../app/actions/storage-actions";
+import { revalidatePath } from "next/cache";
 import type {
     Technology,
     Topic,
@@ -29,6 +30,12 @@ const invalidateTrayectoryCache = async () => {
     const keys = await safeRedisKeys("trayectory_*");
     if (keys.length > 0) {
         await safeRedisDel(...keys);
+    }
+    try {
+        revalidatePath("/experience");
+        revalidatePath("/admin/actions/experience");
+    } catch {
+        // En entornos de testing unitario sin contexto de Next.js
     }
 };
 

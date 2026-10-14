@@ -9,6 +9,16 @@ interface HeroSectionProps {
 }
 
 const AutoCarousel = ({ items }: { items: ExperienceCarouselItem[] }) => {
+	if (items.length === 0) {
+		return (
+			<div className="flex h-[240px] w-full items-center justify-center rounded-2xl border border-aperture-yellow/20 bg-[#10100b] p-6 text-center shadow-[0_24px_60px_rgba(0,0,0,0.55)]">
+				<p className="font-mono text-xs uppercase tracking-[0.25em] text-zinc-500">
+					Sin capturas o logs visuales en el carrusel
+				</p>
+			</div>
+		);
+	}
+
 	const trackItems = [...items, ...items];
 
 	return (
@@ -130,25 +140,33 @@ export default function HeroSection({ certifications, carouselItems }: HeroSecti
 					</div>
 				</div>
 
-				<div className="mt-12 flex flex-wrap gap-4 border-t border-white/10 pt-6">
-					{certifications.map((badge) => (
-						<div
-							key={badge.id}
-							className="group relative rounded-full border border-aperture-yellow/40 bg-aperture-yellow/10 px-4 py-2 text-[10px] font-mono uppercase tracking-[0.35em] text-aperture-yellow transition hover:bg-aperture-yellow hover:text-black"
-						>
-							{badge.url ? (
-								<a href={badge.url} target="_blank" rel="noopener noreferrer">
-									{badge.title}
-								</a>
-							) : (
-								badge.title
-							)}
-							<div className="pointer-events-none absolute -top-12 left-1/2 w-max -translate-x-1/2 rounded-md border border-white/10 bg-black/80 px-3 py-1 text-[9px] font-mono uppercase tracking-[0.3em] text-zinc-200 opacity-0 transition group-hover:opacity-100">
-								{badge.meta}
+				{certifications.length > 0 ? (
+					<div className="mt-12 flex flex-wrap gap-4 border-t border-white/10 pt-6">
+						{certifications.map((badge) => (
+							<div
+								key={badge.id}
+								className="group relative rounded-full border border-aperture-yellow/40 bg-aperture-yellow/10 px-4 py-2 text-[10px] font-mono uppercase tracking-[0.35em] text-aperture-yellow transition hover:bg-aperture-yellow hover:text-black"
+							>
+								{badge.url ? (
+									<a href={badge.url} target="_blank" rel="noopener noreferrer">
+										{badge.title}
+									</a>
+								) : (
+									badge.title
+								)}
+								<div className="pointer-events-none absolute -top-12 left-1/2 w-max -translate-x-1/2 rounded-md border border-white/10 bg-black/80 px-3 py-1 text-[9px] font-mono uppercase tracking-[0.3em] text-zinc-200 opacity-0 transition group-hover:opacity-100">
+									{badge.meta}
+								</div>
 							</div>
-						</div>
-					))}
-				</div>
+						))}
+					</div>
+				) : (
+					<div className="mt-12 border-t border-white/10 pt-6">
+						<p className="text-xs font-mono uppercase tracking-[0.2em] text-zinc-500">
+							Sin certificaciones registradas actualmente
+						</p>
+					</div>
+				)}
 			</div>
 		</section>
 	);

@@ -4,6 +4,7 @@ import { getSupabaseClient } from "../../../lib/supabase";
 import { safeRedisGet, safeRedisSet, safeRedisKeys, safeRedisDel } from "../../../lib/redis";
 import type { BlogArticle, BlogSortOrder } from "../types";
 import { checkAdminAuth } from "../../../lib/admin-auth";
+import { revalidatePath } from "next/cache";
 
 export type BlogArticleRecord = {
 	id: string;
@@ -88,6 +89,11 @@ const invalidateBlogCache = async () => {
 	const keys = await safeRedisKeys(`${CACHE_KEY_PREFIX}*`);
 	if (keys.length > 0) {
 		await safeRedisDel(...keys);
+	}
+	try {
+		revalidatePath("/blog");
+	} catch {
+		// En entornos de testing unitario sin contexto de Next.js
 	}
 };
 

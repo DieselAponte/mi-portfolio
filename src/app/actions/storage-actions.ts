@@ -3,17 +3,17 @@
 import { getSupabaseClient } from "@/lib/supabase";
 import { checkAdminAuth } from "@/lib/admin-auth";
 
-const BUCKET_NAME = "portfolio-assets";
+const BUCKET_NAME = "portfolio-images";
 
 export async function uploadStorageAsset(formData: FormData): Promise<string> {
     await checkAdminAuth();
     
     const file = formData.get("file") as File;
-    const folder = formData.get("folder") as string;
+    const folder = (formData.get("folder") as string) || "misc";
     const filename = formData.get("filename") as string;
 
-    if (!file || !folder || !filename) {
-        throw new Error("Missing required form data: file, folder, or filename");
+    if (!file || !filename) {
+        throw new Error("Missing required form data: file or filename");
     }
 
     const supabase = getSupabaseClient();
@@ -43,14 +43,20 @@ export async function uploadStorageAsset(formData: FormData): Promise<string> {
 
 export async function deleteStorageAsset(path: string): Promise<void> {
     await checkAdminAuth();
+    if (!path) return;
     const supabase = getSupabaseClient();
 
     let relativePath = path;
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-    const bucketUrlPrefix = `${supabaseUrl}/storage/v1/object/public/${BUCKET_NAME}/`;
-    
-    if (path.startsWith(bucketUrlPrefix)) {
-        relativePath = path.replace(bucketUrlPrefix, "");
+    const bucketMarker = `/${BUCKET_NAME}/`;
+    const markerIdx = path.indexOf(bucketMarker);
+    if (markerIdx !== -1) {
+        relativePath = path.substring(markerIdx + bucketMarker.length);
+    } else {
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+        const bucketUrlPrefix = `${supabaseUrl}/storage/v1/object/public/${BUCKET_NAME}/`;
+        if (path.startsWith(bucketUrlPrefix)) {
+            relativePath = path.replace(bucketUrlPrefix, "");
+        }
     }
 
     const { error } = await supabase.storage

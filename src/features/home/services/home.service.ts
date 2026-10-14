@@ -4,6 +4,7 @@ import { getSupabaseClient } from "../../../lib/supabase";
 import { safeRedisGet, safeRedisSet, safeRedisKeys, safeRedisDel } from "../../../lib/redis";
 import type { HomeCaseOfStudy, HomeService } from "../types";
 import { checkAdminAuth } from "../../../lib/admin-auth";
+import { revalidatePath } from "next/cache";
 
 const CACHE_KEY_CASES = "home_cases_of_study";
 const CACHE_KEY_SERVICES = "home_services";
@@ -57,6 +58,12 @@ const invalidateHomeCache = async () => {
     const keys = await safeRedisKeys("home_*");
     if (keys.length > 0) {
         await safeRedisDel(...keys);
+    }
+    try {
+        revalidatePath("/");
+        revalidatePath("/admin/actions/home");
+    } catch {
+        // En entornos de testing unitario sin contexto de Next.js
     }
 };
 

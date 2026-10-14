@@ -23,7 +23,7 @@ export const TopArticles = ({ articles }: TopArticlesProps) => {
 
 				{articles.length === 0 ? (
 					<p className="mt-8 text-center text-sm text-zinc-300">
-						No featured articles available.
+						Actualmente no hay artículos destacados disponibles en esta sección.
 					</p>
 				) : (
 					<div className="mt-8 grid gap-6 md:grid-cols-3">

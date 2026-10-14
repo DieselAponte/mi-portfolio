@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { Suspense } from "react";
 import BlogContainer from "../../features/blog/BlogContainer";
 import { fetchArticles } from "../../features/blog/services/blog.service";

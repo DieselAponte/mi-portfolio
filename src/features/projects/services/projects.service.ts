@@ -4,6 +4,7 @@ import { getSupabaseClient } from "../../../lib/supabase";
 import { safeRedisGet, safeRedisSet, safeRedisKeys, safeRedisDel } from "../../../lib/redis";
 import type { Project } from "../types";
 import { checkAdminAuth } from "../../../lib/admin-auth";
+import { revalidatePath } from "next/cache";
 
 export type ProjectRecord = {
 	id: string | number;
@@ -77,6 +78,11 @@ const invalidateProjectsCache = async () => {
 	const keys = await safeRedisKeys(`${CACHE_KEY_PREFIX}*`);
 	if (keys.length > 0) {
 		await safeRedisDel(...keys);
+	}
+	try {
+		revalidatePath("/projects");
+	} catch {
+		// En entornos de testing unitario sin contexto de Next.js
 	}
 };
 

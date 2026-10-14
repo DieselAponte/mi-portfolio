@@ -1,15 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { redis } from '../../../lib/redis';
+import { safeRedisGet, safeRedisSet } from '../../../lib/redis';
 
 import { fetchProjects } from './projects.service';
 
 vi.mock('../../../lib/redis', () => ({
-  redis: {
-    get: vi.fn(),
-    setex: vi.fn(),
-    keys: vi.fn(),
-    del: vi.fn(),
-  }
+  safeRedisGet: vi.fn(),
+  safeRedisSet: vi.fn(),
+  safeRedisDel: vi.fn(),
+  safeRedisKeys: vi.fn(),
 }));
 
 vi.mock('@supabase/supabase-js', () => {
@@ -58,21 +56,21 @@ describe('Projects Service', () => {
 
   it('fetchProjects should return cached data if available', async () => {
     const cachedData = [{ id: 'cached-proj-1', title: 'Cached Proj' }];
-    vi.mocked(redis.get).mockResolvedValueOnce(JSON.stringify(cachedData));
+    vi.mocked(safeRedisGet).mockResolvedValueOnce(JSON.stringify(cachedData));
 
     const result = await fetchProjects();
 
-    expect(redis.get).toHaveBeenCalled();
+    expect(safeRedisGet).toHaveBeenCalled();
     expect(result).toEqual(cachedData);
   });
 
   it('fetchProjects should fetch from Supabase if cache misses', async () => {
-    vi.mocked(redis.get).mockResolvedValueOnce(null);
+    vi.mocked(safeRedisGet).mockResolvedValueOnce(null);
 
     const result = await fetchProjects();
 
-    expect(redis.get).toHaveBeenCalled();
-    expect(redis.setex).toHaveBeenCalled();
+    expect(safeRedisGet).toHaveBeenCalled();
+    expect(safeRedisSet).toHaveBeenCalled();
     expect(result.length).toBe(1);
     expect(result[0].id).toBe('proj-1');
   });

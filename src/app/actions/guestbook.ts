@@ -18,7 +18,7 @@ export async function createGuestbookNoteAction(
     const sessionData = await requireServerSession();
     
     // We need service_role key to bypass RLS since the client won't have the Supabase Auth JWT
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!supabaseUrl || !supabaseServiceKey) {

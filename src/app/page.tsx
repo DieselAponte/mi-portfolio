@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { HomeContainer } from "../features/home/HomeContainer";
 import { fetchCasesOfStudy, fetchHomeServices } from "../features/home/services/home.service";
 

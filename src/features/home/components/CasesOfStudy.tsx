@@ -16,10 +16,20 @@ export const CasesOfStudy = ({ cases }: CasesOfStudyProps) => {
         </h2>
       </div>
 
-      <div className="relative mt-12">
-        <div className="absolute left-1/2 top-0 hidden h-full w-[2px] -translate-x-1/2 bg-aperture-gray/60 lg:block" />
+      {cases.length === 0 ? (
+        <div className="glass-panel mx-auto mt-12 max-w-2xl rounded-2xl px-6 py-12 text-center">
+          <p className="font-mono text-xs uppercase tracking-[0.3em] text-aperture-yellow">
+            Timeline // Status: Empty
+          </p>
+          <p className="mt-3 text-sm text-zinc-300">
+            Actualmente no hay casos de estudio registrados en esta sección.
+          </p>
+        </div>
+      ) : (
+        <div className="relative mt-12">
+          <div className="absolute left-1/2 top-0 hidden h-full w-[2px] -translate-x-1/2 bg-aperture-gray/60 lg:block" />
 
-        <div className="space-y-12">
+          <div className="space-y-12">
           {cases.map((item, index) => {
             const isLeft = index % 2 === 0;
             const card = (
@@ -78,6 +88,7 @@ export const CasesOfStudy = ({ cases }: CasesOfStudyProps) => {
           })}
         </div>
       </div>
+      )}
     </div>
   );
 };

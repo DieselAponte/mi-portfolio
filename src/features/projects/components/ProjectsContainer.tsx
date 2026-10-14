@@ -13,89 +13,6 @@ import { TechFilters } from "./TechFilters";
 
 const PAGE_LIMIT = 4;
 
-const fallbackProjects: Project[] = [
-  {
-    id: "A01",
-    title: "Aperture Command Console",
-    description:
-      "Operator dashboard designed for low-light environments and high focus.",
-    date: "2025-12-20",
-    tech_stack: ["Frontend", "Infrastructure", "TypeScript"],
-    github_url: "https://github.com/",
-    image_url: "/images/setup-dev-portal.png",
-  },
-  {
-    id: "B14",
-    title: "Telemetry Relay",
-    description:
-      "A visual system for monitoring real-time experiments and anomaly logs.",
-    date: "2025-11-08",
-    tech_stack: ["Backend", "Infrastructure", "Postgres"],
-    github_url: "https://github.com/",
-    image_url: "/images/portal-ending.jpg",
-  },
-  {
-    id: "C07",
-    title: "Guidance Protocol",
-    description:
-      "An adaptive UI kit for navigation, control rooms, and lab kiosks.",
-    date: "2025-10-18",
-    tech_stack: ["Frontend", "Backend", "Next.js"],
-    github_url: "https://github.com/",
-    image_url: "/images/setup-dev-portal.png",
-  },
-  {
-    id: "D22",
-    title: "Mobile Diagnostics",
-    description:
-      "Field-ready tooling for calibration teams operating across facilities.",
-    date: "2025-09-30",
-    tech_stack: ["Mobile", "Frontend", "React"],
-    github_url: "https://github.com/",
-    image_url: "/images/portal-ending.jpg",
-  },
-  {
-    id: "E05",
-    title: "Containment Map",
-    description:
-      "Top-down visualization suite for live test chamber monitoring.",
-    date: "2025-09-14",
-    tech_stack: ["Frontend", "Infrastructure", "Visualization"],
-    github_url: "https://github.com/",
-    image_url: "/images/setup-dev-portal.png",
-  },
-  {
-    id: "F11",
-    title: "Specimen Tracker",
-    description:
-      "Operational tracking pipeline for assets moving between labs.",
-    date: "2025-08-02",
-    tech_stack: ["Backend", "Infrastructure", "APIs"],
-    github_url: "https://github.com/",
-    image_url: "/images/portal-ending.jpg",
-  },
-  {
-    id: "G03",
-    title: "Aerial Console",
-    description:
-      "Cross-platform command deck with offline failsafes and sync queues.",
-    date: "2025-07-24",
-    tech_stack: ["Mobile", "Backend", "Sync"],
-    github_url: "https://github.com/",
-    image_url: "/images/setup-dev-portal.png",
-  },
-  {
-    id: "H09",
-    title: "Edge Relay",
-    description:
-      "Low-latency relay service for mission critical telemetry streams.",
-    date: "2025-06-18",
-    tech_stack: ["Backend", "Infrastructure", "Edge"],
-    github_url: "https://github.com/",
-    image_url: "/images/portal-ending.jpg",
-  },
-];
-
 export default function ProjectsContainer() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -122,8 +39,8 @@ export default function ProjectsContainer() {
       setProjects(items);
       setHasMore(items.length === PAGE_LIMIT);
     } catch (fetchError) {
-      setProjects(fallbackProjects.slice(0, PAGE_LIMIT));
-      setHasMore(fallbackProjects.length > PAGE_LIMIT);
+      setProjects([]);
+      setHasMore(false);
       setError(
         fetchError instanceof Error
           ? fetchError.message
@@ -147,15 +64,13 @@ export default function ProjectsContainer() {
       });
       setProjects((prev) => [...prev, ...nextBatch]);
       setHasMore(nextBatch.length === PAGE_LIMIT);
-    } catch {
-      setProjects((prev) => {
-        const nextBatch = fallbackProjects.slice(
-          prev.length,
-          prev.length + PAGE_LIMIT,
-        );
-        setHasMore(prev.length + nextBatch.length < fallbackProjects.length);
-        return [...prev, ...nextBatch];
-      });
+    } catch (fetchError) {
+      setHasMore(false);
+      setError(
+        fetchError instanceof Error
+          ? fetchError.message
+          : "Unable to load more projects.",
+      );
     } finally {
       setIsLoadingMore(false);
     }
@@ -178,7 +93,7 @@ export default function ProjectsContainer() {
     }
     return (
       <div className="rounded-2xl border border-aperture-yellow/40 bg-[#1a1810]/60 px-4 py-3 text-xs text-aperture-yellow">
-        Live feed offline. Showing local data cache.
+        {error}
       </div>
     );
   }, [error]);

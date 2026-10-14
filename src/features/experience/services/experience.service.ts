@@ -4,6 +4,7 @@ import { getSupabaseClient } from "../../../lib/supabase";
 import { safeRedisGet, safeRedisSet, safeRedisKeys, safeRedisDel } from "../../../lib/redis";
 import type { TechBubble, ExperienceSlide, TrajectorySectionData, ExperienceCertification, ExperienceCarouselItem } from "../types";
 import { checkAdminAuth } from "../../../lib/admin-auth";
+import { revalidatePath } from "next/cache";
 
 const CACHE_KEY_MODULES = "experience_modules";
 const CACHE_KEY_SLIDES = "experience_slides";
@@ -82,6 +83,12 @@ const invalidateExperienceCache = async () => {
     const allKeys = [...keys, ...techKeys];
     if (allKeys.length > 0) {
         await safeRedisDel(...allKeys);
+    }
+    try {
+        revalidatePath("/experience");
+        revalidatePath("/admin/actions/experience");
+    } catch {
+        // En entornos de testing unitario sin contexto de Next.js
     }
 };
 
@@ -183,27 +190,28 @@ export const uploadCarouselImage = async (file: File): Promise<string> => {
     const client = getSupabaseClient();
     const fileExt = file.name.split(".").pop();
     const fileName = `carousel-${Date.now()}.${fileExt}`;
-    const filePath = `carousel-images/${fileName}`;
+    const filePath = `carousel/${fileName}`;
 
-    const { error } = await client.storage.from("experience").upload(filePath, file, {
+    const { error } = await client.storage.from("portfolio-images").upload(filePath, file, {
         cacheControl: "3600",
         upsert: false,
     });
     if (error) throw new Error(error.message);
 
-    const { data: publicUrlData } = client.storage.from("experience").getPublicUrl(filePath);
+    const { data: publicUrlData } = client.storage.from("portfolio-images").getPublicUrl(filePath);
     return publicUrlData.publicUrl;
 };
 
 export const deleteCarouselImage = async (imagePath: string) => {
     await checkAdminAuth();
+    if (!imagePath) return;
     const client = getSupabaseClient();
-    const bucketPrefix = "/experience/";
+    const bucketPrefix = "/portfolio-images/";
     const idx = imagePath.indexOf(bucketPrefix);
     if (idx === -1) return;
     const storagePath = imagePath.substring(idx + bucketPrefix.length);
 
-    const { error } = await client.storage.from("experience").remove([storagePath]);
+    const { error } = await client.storage.from("portfolio-images").remove([storagePath]);
     if (error) console.error("Error deleting carousel image:", error);
 };
 

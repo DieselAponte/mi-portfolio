@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import ExperienceContainer from "../../features/experience/ExperienceContainer";
 import { fetchCertifications, fetchCarouselItems } from "../../features/experience/services/experience.service";
 import { fetchPublicaciones } from "../../features/experience/services/trayectory.service";

@@ -163,7 +163,7 @@ CREATE TABLE IF NOT EXISTS public.guestbook_notes (
     site_url   TEXT,
     github_url TEXT,
     avatar_url TEXT,
-    user_id    UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    user_id    TEXT REFERENCES public."user"(id) ON DELETE SET NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -483,3 +483,23 @@ EXCEPTION WHEN duplicate_object THEN
     NULL;
 END;
 $$;
+
+-- =============================================================================
+-- STORAGE BUCKETS INITIALIZATION
+-- =============================================================================
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('portfolio-images', 'portfolio-images', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+-- Policy: Allow public read on storage.objects for portfolio-images
+DO $$
+BEGIN
+    DROP POLICY IF EXISTS "Public Access portfolio-images" ON storage.objects;
+    CREATE POLICY "Public Access portfolio-images"
+        ON storage.objects FOR SELECT
+        USING (bucket_id = 'portfolio-images');
+EXCEPTION WHEN undefined_table THEN
+    NULL;
+END;
+$$;
+

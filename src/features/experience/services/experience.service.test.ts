@@ -1,15 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { redis } from '../../../lib/redis';
+import { safeRedisGet, safeRedisSet } from '../../../lib/redis';
 
 import { fetchModules, fetchSlides } from './experience.service';
 
 vi.mock('../../../lib/redis', () => ({
-  redis: {
-    get: vi.fn(),
-    setex: vi.fn(),
-    keys: vi.fn(),
-    del: vi.fn(),
-  }
+  safeRedisGet: vi.fn(),
+  safeRedisSet: vi.fn(),
+  safeRedisDel: vi.fn(),
+  safeRedisKeys: vi.fn(),
 }));
 
 vi.mock('@supabase/supabase-js', () => {
@@ -82,42 +80,42 @@ describe('Experience Service', () => {
 
   it('fetchModules should return cached data if available', async () => {
     const cachedData = [{ id: 'cached-mod-1', title: 'Cached Mod' }];
-    vi.mocked(redis.get).mockResolvedValueOnce(JSON.stringify(cachedData));
+    vi.mocked(safeRedisGet).mockResolvedValueOnce(JSON.stringify(cachedData));
 
     const result = await fetchModules();
 
-    expect(redis.get).toHaveBeenCalled();
+    expect(safeRedisGet).toHaveBeenCalled();
     expect(result).toEqual(cachedData);
   });
 
   it('fetchModules should fetch from Supabase if cache misses', async () => {
-    vi.mocked(redis.get).mockResolvedValueOnce(null);
+    vi.mocked(safeRedisGet).mockResolvedValueOnce(null);
 
     const result = await fetchModules();
 
-    expect(redis.get).toHaveBeenCalled();
-    expect(redis.setex).toHaveBeenCalled();
+    expect(safeRedisGet).toHaveBeenCalled();
+    expect(safeRedisSet).toHaveBeenCalled();
     expect(result.length).toBe(1);
     expect(result[0].id).toBe('01');
   });
 
   it('fetchSlides should return cached data if available', async () => {
     const cachedData = [{ id: 'cached-slide-1', role: 'Cached Role' }];
-    vi.mocked(redis.get).mockResolvedValueOnce(JSON.stringify(cachedData));
+    vi.mocked(safeRedisGet).mockResolvedValueOnce(JSON.stringify(cachedData));
 
     const result = await fetchSlides();
 
-    expect(redis.get).toHaveBeenCalled();
+    expect(safeRedisGet).toHaveBeenCalled();
     expect(result).toEqual(cachedData);
   });
 
   it('fetchSlides should fetch from Supabase if cache misses', async () => {
-    vi.mocked(redis.get).mockResolvedValueOnce(null);
+    vi.mocked(safeRedisGet).mockResolvedValueOnce(null);
 
     const result = await fetchSlides();
 
-    expect(redis.get).toHaveBeenCalled();
-    expect(redis.setex).toHaveBeenCalled();
+    expect(safeRedisGet).toHaveBeenCalled();
+    expect(safeRedisSet).toHaveBeenCalled();
     expect(result.length).toBe(1);
     expect(result[0].id).toBe('slide-1');
   });

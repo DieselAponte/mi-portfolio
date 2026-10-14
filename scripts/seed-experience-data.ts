@@ -79,7 +79,7 @@ async function seed() {
   const { error: deleteCertsError } = await supabase
     .from("experience_certifications")
     .delete()
-    .neq("id", "00000000-0000-0000-0000-000000000000");
+    .gt("id", 0);
 
   if (deleteCertsError) {
     console.error("  ⚠ Error clearing certifications:", deleteCertsError.message);
@@ -105,7 +105,7 @@ async function seed() {
   const { error: deleteCarouselError } = await supabase
     .from("experience_carousel_items")
     .delete()
-    .neq("id", "00000000-0000-0000-0000-000000000000");
+    .gt("id", 0);
 
   if (deleteCarouselError) {
     console.error(

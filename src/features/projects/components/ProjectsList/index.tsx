@@ -91,9 +91,12 @@ export const ProjectsList = ({
 
   if (projects.length === 0) {
     return (
-      <section className="rounded-2xl border border-aperture-gray/60 bg-aperture-dark/40 px-6 py-8 text-center">
-        <p className="text-sm text-zinc-400">
-          No projects match the active filters.
+      <section className="rounded-2xl border border-aperture-gray/60 bg-aperture-dark/40 px-6 py-12 text-center">
+        <p className="font-mono text-xs uppercase tracking-[0.3em] text-aperture-yellow">
+          Testing Tracks // Feed Status
+        </p>
+        <p className="mt-3 text-sm text-zinc-300">
+          Actualmente no hay proyectos disponibles que coincidan con la sección o los filtros activos.
         </p>
       </section>
     );

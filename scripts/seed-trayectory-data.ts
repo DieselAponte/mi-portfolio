@@ -44,9 +44,9 @@ async function seed() {
 
   // 1. CLEAR EXISTING DATA
   console.log("📋 Clearing existing data (cascade will handle details)...");
-  await supabase.from("nivel_publicacion").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-  await supabase.from("technologies").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-  await supabase.from("topics").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+  await supabase.from("nivel_publicacion").delete().gt("id", 0);
+  await supabase.from("technologies").delete().gt("id", 0);
+  await supabase.from("topics").delete().gt("id", 0);
 
   // 2. SEED TOPICS
   console.log("📥 Inserting predefined topics...");
