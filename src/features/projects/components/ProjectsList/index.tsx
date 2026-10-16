@@ -135,53 +135,69 @@ export const ProjectsList = ({
                 animate={{ opacity: 1, filter: "blur(0px)" }}
                 exit={{ opacity: 0, filter: "blur(12px)" }}
                 transition={{ duration: 0.25 }}
-                className="group overflow-hidden rounded-2xl border border-aperture-gray/70 bg-[#101219]/80"
+                className="group relative overflow-hidden rounded-2xl border border-aperture-gray/70 bg-[#101219]/80 transition duration-300 hover:border-aperture-blue/60 hover:shadow-[0_0_30px_rgba(86,204,242,0.12)] cursor-pointer"
               >
-                <div className="relative h-44 w-full overflow-hidden border-b border-aperture-gray/60">
-                  <Image
-                    src={project.image_url}
-                    alt={project.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    className="object-cover transition duration-300 group-hover:scale-[1.02]"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                </div>
+                <Link
+                  href={`/projects/${project.id}`}
+                  className="block h-full focus:outline-none"
+                >
+                  <div className="relative h-44 w-full overflow-hidden border-b border-aperture-gray/60">
+                    <Image
+                      src={project.image_url}
+                      alt={project.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="object-cover transition duration-300 group-hover:scale-[1.03]"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  </div>
 
-                <div className="space-y-4 p-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-xs font-mono uppercase tracking-[0.3em] text-aperture-blue">
-                        {formatDate(project.date)}
-                      </p>
-                      <h4 className="mt-2 text-lg font-semibold text-white">
-                        {project.title}
-                      </h4>
+                  <div className="space-y-4 p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-xs font-mono uppercase tracking-[0.3em] text-aperture-blue">
+                          {formatDate(project.date)}
+                        </p>
+                        <h4 className="mt-2 text-lg font-bold text-white group-hover:text-aperture-blue transition-colors">
+                          {project.title}
+                        </h4>
+                      </div>
+
+                      {project.github_url && (
+                        <a
+                          href={project.github_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="group/btn relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-aperture-blue/80 bg-aperture-blue/20 text-white shadow-[0_0_15px_rgba(86,204,242,0.4)] transition-all duration-300 hover:scale-110 hover:border-aperture-blue hover:bg-aperture-blue hover:text-black hover:shadow-[0_0_22px_rgba(86,204,242,0.85)]"
+                          aria-label={`Abrir ${project.title} en GitHub`}
+                        >
+                          <GithubIcon className="h-4 w-4 transition-transform duration-300 group-hover/btn:scale-110" />
+                        </a>
+                      )}
                     </div>
-                    <Link
-                      href={project.github_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="group/btn flex h-9 w-9 items-center justify-center rounded-full border border-aperture-blue/40 bg-aperture-blue/10 text-aperture-blue transition-all duration-300 hover:border-aperture-blue hover:bg-aperture-blue/25 hover:text-white hover:shadow-[0_0_14px_rgba(86,204,242,0.45)]"
-                      aria-label={`Open ${project.title} on GitHub`}
-                    >
-                      <GithubIcon className="h-4 w-4 transition-transform duration-300 group-hover/btn:scale-110" />
-                    </Link>
+
+                    <p className="text-sm leading-6 text-zinc-300 line-clamp-3">
+                      {project.description}
+                    </p>
+
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {project.tech_stack.map((tech) => (
+                        <span
+                          key={tech}
+                          className="rounded-full border border-aperture-blue/50 bg-black/40 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.18em] text-aperture-blue"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="pt-2 flex items-center justify-between border-t border-aperture-gray/30 text-[11px] font-mono uppercase tracking-wider text-zinc-500 group-hover:text-aperture-blue transition-colors">
+                      <span>Ver Estudio Completo</span>
+                      <span>→</span>
+                    </div>
                   </div>
-                  <p className="text-sm leading-6 text-zinc-300">
-                    {project.description}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {project.tech_stack.map((tech) => (
-                      <span
-                        key={tech}
-                        className="rounded-full border border-aperture-blue/60 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.2em] text-aperture-blue"
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+                </Link>
               </motion.article>
             ))}
           </AnimatePresence>

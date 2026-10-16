@@ -110,18 +110,12 @@ export const EditServicesPopup = ({
           <div>
             <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
               Descripción
-              <span className="ml-2 text-zinc-600">
-                ({description.length}/500)
-              </span>
             </label>
             <textarea
               value={description}
-              onChange={(e) =>
-                setDescription(e.target.value.slice(0, 500))
-              }
-              maxLength={500}
-              rows={3}
-              className="w-full resize-none rounded-lg border border-aperture-gray bg-aperture-dark/80 px-4 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition focus:border-aperture-blue/60"
+              onChange={(e) => setDescription(e.target.value)}
+              rows={4}
+              className="w-full resize-y rounded-lg border border-aperture-gray bg-aperture-dark/80 px-4 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition focus:border-aperture-blue/60"
             />
           </div>
 

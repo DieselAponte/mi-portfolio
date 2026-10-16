@@ -7,7 +7,7 @@ import { checkAdminAuth } from "../../../lib/admin-auth";
 import { revalidatePath } from "next/cache";
 
 export type BlogArticleRecord = {
-	id: string;
+	id: string | number;
 	date: string;
 	title: string;
 	description: string;
@@ -15,6 +15,10 @@ export type BlogArticleRecord = {
 	tags: string[];
 	content: string;
 	is_featured: boolean;
+	introduction?: string;
+	content_blocks?: import("../types").ArticleParagraphBlock[];
+	reflection?: string;
+	conclusion?: string;
 };
 
 export type BlogQuery = {
@@ -34,8 +38,13 @@ const mapRecordToArticle = (record: BlogArticleRecord): BlogArticle => ({
 	title: record.title,
 	description: record.description,
 	thumbnail: record.thumbnail,
-	tags: record.tags,
-	content: record.content,
+	tags: record.tags ?? [],
+	content: record.content ?? "",
+	is_featured: Boolean(record.is_featured),
+	introduction: record.introduction ?? "",
+	content_blocks: Array.isArray(record.content_blocks) ? record.content_blocks : [],
+	reflection: record.reflection ?? "",
+	conclusion: record.conclusion ?? "",
 });
 
 export const fetchArticles = async (query?: BlogQuery): Promise<BlogArticle[]> => {
@@ -85,43 +94,57 @@ export const fetchArticles = async (query?: BlogQuery): Promise<BlogArticle[]> =
 	return articles;
 };
 
-const invalidateBlogCache = async () => {
+export const getArticleById = async (id: string | number): Promise<BlogArticle | null> => {
+	const client = getSupabaseClient();
+	const { data, error } = await client
+		.from("blog_articles")
+		.select("*")
+		.eq("id", id)
+		.single();
+
+	if (error || !data) {
+		return null;
+	}
+
+	return mapRecordToArticle(data as BlogArticleRecord);
+};
+
+const invalidateBlogCache = async (id?: string | number) => {
 	const keys = await safeRedisKeys(`${CACHE_KEY_PREFIX}*`);
 	if (keys.length > 0) {
 		await safeRedisDel(...keys);
 	}
 	try {
 		revalidatePath("/blog");
+		if (id) {
+			revalidatePath(`/blog/${id}`);
+		}
 	} catch {
 		// En entornos de testing unitario sin contexto de Next.js
 	}
 };
 
-export const addArticle = async (article: BlogArticleRecord) => {
+export const addArticle = async (article: Omit<BlogArticleRecord, "id"> & { id?: string | number }) => {
 	await checkAdminAuth();
 	const client = getSupabaseClient();
-	const { error } = await client.from("blog_articles").insert(article);
+	const { data, error } = await client.from("blog_articles").insert(article).select().single();
 	if (error) throw new Error(error.message);
-	await invalidateBlogCache();
+	await invalidateBlogCache(data?.id);
+	return data;
 };
 
-export const updateArticle = async (id: string, updates: Partial<BlogArticleRecord>) => {
+export const updateArticle = async (id: string | number, updates: Partial<BlogArticleRecord>) => {
 	await checkAdminAuth();
 	const client = getSupabaseClient();
 	const { error } = await client.from("blog_articles").update(updates).eq("id", id);
 	if (error) throw new Error(error.message);
-	await invalidateBlogCache();
+	await invalidateBlogCache(id);
 };
 
-export const deleteArticle = async (id: string) => {
+export const deleteArticle = async (id: string | number) => {
 	await checkAdminAuth();
 	const client = getSupabaseClient();
 	const { error } = await client.from("blog_articles").delete().eq("id", id);
 	if (error) throw new Error(error.message);
-	await invalidateBlogCache();
-};
-
-export const getArticleById = async (id: string): Promise<BlogArticle | null> => {
-	const articles = await fetchArticles();
-	return articles.find((a) => a.id === id) ?? null;
+	await invalidateBlogCache(id);
 };
