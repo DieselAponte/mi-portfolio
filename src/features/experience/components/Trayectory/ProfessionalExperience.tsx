@@ -9,26 +9,28 @@ import type { ExperiencePublication } from "../../types";
 export default function Experience({ data }: { data: ExperiencePublication[] }) {
 	const [activeIndex, setActiveIndex] = useState(0);
 	const [screenIndex, setScreenIndex] = useState(0);
+	const [isPaused, setIsPaused] = useState(false);
 
 	const activePub = data[activeIndex];
 
-	// Cycle through publications every 8 seconds
+	// Cycle through publications every 8 seconds (pause on hover)
 	useEffect(() => {
-		if (data.length <= 1) return;
+		if (data.length <= 1 || isPaused) return;
 		const interval = setInterval(() => {
 			setActiveIndex((prev) => (prev + 1) % data.length);
 			setScreenIndex(0); // Reset to screen 1 when switching publications
 		}, 8000);
 		return () => clearInterval(interval);
-	}, [data.length]);
+	}, [data.length, isPaused]);
 
-	// Dual-screen carousel: alternate every 5 seconds
+	// Dual-screen carousel: alternate every 10 seconds, pause on hover
 	useEffect(() => {
+		if (isPaused) return;
 		const interval = setInterval(() => {
 			setScreenIndex((prev) => (prev + 1) % 2);
-		}, 5000);
+		}, 10000);
 		return () => clearInterval(interval);
-	}, []);
+	}, [isPaused]);
 
 	if (!activePub) return null;
 
@@ -51,7 +53,7 @@ export default function Experience({ data }: { data: ExperiencePublication[] }) 
 						className="text-3xl font-black text-white sm:text-4xl"
 						style={{ fontFamily: "DIN, Helvetica, Arial, sans-serif" }}
 					>
-						Professional Experience
+						{activePub.title}
 					</h3>
 					<p className="text-sm leading-7 text-zinc-300">
 						{activePub.description}
@@ -70,7 +72,14 @@ export default function Experience({ data }: { data: ExperiencePublication[] }) 
 					</div>
 				</div>
 
-				<IBMPCMonitor screenClassName="h-[300px]">
+				<IBMPCMonitor
+					screenClassName="h-[300px]"
+					currentScreen={screenIndex}
+					totalScreens={2}
+					onScreenChange={setScreenIndex}
+					onMouseEnter={() => setIsPaused(true)}
+					onMouseLeave={() => setIsPaused(false)}
+				>
 					<div className="relative h-[300px] w-full overflow-hidden rounded-[8px] bg-[#0a0a0c]">
 						<div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(86,204,242,0.12),transparent_65%)]" />
 						<div className="absolute inset-0 border border-white/10" />
@@ -79,7 +88,11 @@ export default function Experience({ data }: { data: ExperiencePublication[] }) 
 							{screenIndex === 0 ? (
 								<motion.div
 									key={`${activePub.id}-screen1`}
-									className="relative z-10 h-full p-6 text-[#f0f0f0]"
+									className="relative z-10 h-full overflow-y-auto p-6 pr-3 text-[#f0f0f0]"
+									style={{
+										scrollbarWidth: "thin",
+										scrollbarColor: "rgba(86, 204, 242, 0.4) transparent",
+									}}
 									initial={{ opacity: 0, y: 12 }}
 									animate={{ opacity: 1, y: 0 }}
 									exit={{ opacity: 0, y: -12 }}
@@ -121,24 +134,41 @@ export default function Experience({ data }: { data: ExperiencePublication[] }) 
 							) : (
 								<motion.div
 									key={`${activePub.id}-screen2`}
-									className="relative z-10 h-full"
+									className="relative z-10 h-full w-full"
 									initial={{ opacity: 0, y: 12 }}
 									animate={{ opacity: 1, y: 0 }}
 									exit={{ opacity: 0, y: -12 }}
 									transition={{ duration: 0.5 }}
 								>
 									{activePub.image_path ? (
-										<>
-											<img src={activePub.image_path} alt={activePub.image_description || activePub.title}
-												className="h-full w-full object-cover" />
+										<div className="relative flex h-full w-full items-center justify-center bg-black/60">
+											<img
+												src={activePub.image_path}
+												alt={activePub.image_description || activePub.title}
+												className="h-full w-full object-contain"
+											/>
 											{activePub.image_description && (
-												<div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-													<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-300">
-														{activePub.image_description}
-													</p>
+												<div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center justify-end pb-3">
+													{/* Sombra difuminada triangular */}
+													<div
+														className="absolute bottom-0 h-28 w-full max-w-lg"
+														style={{
+															background:
+																"radial-gradient(ellipse at bottom, rgba(0, 0, 0, 0.96) 20%, rgba(0, 0, 0, 0.85) 60%, rgba(0, 0, 0, 0) 100%)",
+															clipPath: "polygon(0% 100%, 100% 100%, 82% 0%, 18% 0%)",
+															filter: "blur(6px)",
+														}}
+													/>
+													<div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/95 via-black/70 to-transparent" />
+
+													<div className="relative z-10 max-w-xl px-6 text-center">
+														<p className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-white drop-shadow-[0_2px_4px_rgba(0,0,0,1)] sm:text-[11px]">
+															{activePub.image_description}
+														</p>
+													</div>
 												</div>
 											)}
-										</>
+										</div>
 									) : (
 										<div className="flex h-full items-center justify-center">
 											<p className="font-mono text-[10px] text-zinc-600 uppercase tracking-[0.2em]">No image available</p>
@@ -164,13 +194,6 @@ export default function Experience({ data }: { data: ExperiencePublication[] }) 
 					</div>
 				)}
 
-				<button
-					type="button"
-					className="inline-flex items-center gap-3 rounded-sm border border-aperture-blue/70 px-4 py-2 text-[10px] font-mono uppercase tracking-[0.3em] text-aperture-blue transition hover:bg-aperture-blue hover:text-black"
-				>
-					LinkedIn Profile
-					<span className="text-xs">-&gt;</span>
-				</button>
 			</div>
 		</section>
 	);

@@ -23,28 +23,73 @@ const createBarcode = () =>
     height: BARCODE_HEIGHT,
   }));
 
-const renderPictogram = (index: number) => {
-  const variant = index % 4;
+const CHAMBER_ICONS = [
+  "/icons/Chamber_icon_blades_hazard_on.png",
+  "/icons/Chamber_icon_bridge_shield_on.png",
+  "/icons/Chamber_icon_cake_on.png",
+  "/icons/Chamber_icon_crusher_hazard_on.png",
+  "/icons/Chamber_icon_cube_button_on.png",
+  "/icons/Chamber_icon_cube_dispenser_on.png",
+  "/icons/Chamber_icon_cube_hazard_on.png",
+  "/icons/Chamber_icon_excursion_funnel_on.png",
+  "/icons/Chamber_icon_excursion_switch_on.png",
+  "/icons/Chamber_icon_faith_plate_on.png",
+  "/icons/Chamber_icon_fling_enter_on.png",
+  "/icons/Chamber_icon_fling_exit_on.png",
+  "/icons/Chamber_icon_laser_field_on.png",
+  "/icons/Chamber_icon_laser_hazard_on.png",
+  "/icons/Chamber_icon_laser_redirection_on.png",
+  "/icons/Chamber_icon_laser_sensor_on.png",
+  "/icons/Chamber_icon_light_bridge_on.png",
+  "/icons/Chamber_icon_pass_cube_on.png",
+  "/icons/Chamber_icon_pellet_catcher_on.png",
+  "/icons/Chamber_icon_pellet_hazard_on.png",
+  "/icons/Chamber_icon_turret_hazard_on.png",
+  "/icons/Chamber_icon_water_hazard_on.png",
+];
 
-  if (variant === 0) {
-    return <div className="h-3.5 w-3.5 bg-black/60" />;
+interface ChamberIconState {
+  src: string;
+  isOn: boolean;
+}
+
+function generateChamberIcons(panelId: string): ChamberIconState[] {
+  // Deterministic seeded pseudorandom to ensure SSR/client consistency without hydration issues
+  let seed = 0;
+  for (let i = 0; i < panelId.length; i++) {
+    seed = (seed * 37 + panelId.charCodeAt(i) * 17) >>> 0;
+  }
+  const random = () => {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    return seed / 4294967296;
+  };
+
+  // Total icons: min 4, max 8 per panel
+  const total = 4 + Math.floor(random() * 5); // 4, 5, 6, 7, 8
+
+  // Max 2 off, min 2 on (can be 0 off, so offCount is 0, 1, or 2)
+  const maxOff = Math.min(2, total - 2);
+  const offCount = Math.floor(random() * (maxOff + 1)); // 0, 1, or 2
+
+  // Pick unique icons
+  const available = [...CHAMBER_ICONS];
+  const chosen: string[] = [];
+  for (let i = 0; i < total; i++) {
+    const idx = Math.floor(random() * available.length);
+    chosen.push(available.splice(idx, 1)[0]);
   }
 
-  if (variant === 1) {
-    return <div className="h-3.5 w-3.5 rounded-full bg-black/60" />;
+  // Pick random indices to turn off
+  const offIndices = new Set<number>();
+  while (offIndices.size < offCount) {
+    offIndices.add(Math.floor(random() * total));
   }
 
-  if (variant === 2) {
-    return <div className="h-3.5 w-3.5 rotate-45 bg-black/60" />;
-  }
-
-  return (
-    <div
-      className="h-3.5 w-3.5 bg-black/60"
-      style={{ clipPath: "polygon(0 0, 100% 50%, 0 100%)" }}
-    />
-  );
-};
+  return chosen.map((src, index) => ({
+    src,
+    isOn: !offIndices.has(index),
+  }));
+}
 
 export default function PortalPanel({
   id = "01",
@@ -56,7 +101,7 @@ export default function PortalPanel({
   const [isBooting, setIsBooting] = useState(true);
   const [idleFlicker, setIdleFlicker] = useState(false);
   const barcodeBars = useMemo(() => createBarcode(), []);
-  const pictograms = useMemo(() => Array.from({ length: 12 }, (_, i) => i), []);
+  const chamberIcons = useMemo(() => generateChamberIcons(id), [id]);
 
   useEffect(() => {
     let isActive = true;
@@ -198,13 +243,20 @@ export default function PortalPanel({
 
       {/* Pictograms / Danger Sign Grid */}
       <div className="absolute bottom-20 left-6 right-6 z-20">
-        <div className="grid grid-cols-6 gap-2">
-          {pictograms.map((index) => (
+        <div className="grid grid-cols-4 gap-2">
+          {chamberIcons.map((item, index) => (
             <div
-              key={index}
-              className="flex aspect-square items-center justify-center border border-black/25 bg-black/5"
+              key={`${item.src}-${index}`}
+              className="flex aspect-square items-center justify-center border border-black/30 bg-white p-1 shadow-sm"
             >
-              {renderPictogram(index)}
+              <img
+                src={item.src}
+                alt="Chamber Hazard Icon"
+                className={joinClassNames(
+                  "h-full w-full object-contain select-none transition-opacity duration-300",
+                  item.isOn ? "opacity-100" : "opacity-50",
+                )}
+              />
             </div>
           ))}
         </div>
@@ -213,11 +265,12 @@ export default function PortalPanel({
       {/* Bottom Bar: Iconic Aperture logo on left, Status badge on right */}
       <div className="absolute bottom-7 left-6 right-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="relative flex h-5 w-5 items-center justify-center rounded-full border border-black/80">
-            <div className="h-2 w-2 rounded-full border border-black/70" />
-            <div className="absolute inset-[2px] rotate-45 border-l border-black/80" />
-          </div>
-          <p className="font-mono text-[10px] font-bold tracking-[0.25em] text-black/85">
+          <img
+            src="/icons/Aperture-Science-Emblem.png"
+            alt="Aperture Laboratories"
+            className="h-5 w-5 object-contain select-none"
+          />
+          <p className="font-mono text-[10px] font-bold tracking-[0.25em] text-black/85 select-none">
             APERTURE <span className="font-light tracking-[0.15em] text-[8px] hidden sm:inline">LABORATORIES</span>
           </p>
         </div>

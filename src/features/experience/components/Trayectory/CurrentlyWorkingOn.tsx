@@ -23,16 +23,18 @@ const generateBubblePositions = (count: number) => {
 
 export default function CurrentlyWorkingOn({ data }: { data: ProjectPublication }) {
 	const [screenIndex, setScreenIndex] = useState(0);
+	const [isPaused, setIsPaused] = useState(false);
 	const techs = data.technologies ?? [];
 	const bubblePositions = useMemo(() => generateBubblePositions(techs.length), [techs.length]);
 
-	// Dual-screen carousel: alternate every 5 seconds
+	// Dual-screen carousel: alternate every 10 seconds, pause on hover
 	useEffect(() => {
+		if (isPaused) return;
 		const interval = setInterval(() => {
 			setScreenIndex((prev) => (prev + 1) % 2);
-		}, 5000);
+		}, 10000);
 		return () => clearInterval(interval);
-	}, []);
+	}, [isPaused]);
 
 	return (
 		<section className="grid gap-10 md:grid-cols-[minmax(0,240px)_minmax(0,1fr)] lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
@@ -58,17 +60,17 @@ export default function CurrentlyWorkingOn({ data }: { data: ProjectPublication 
 					<p className="text-sm leading-7 text-zinc-300">
 						{data.description}
 					</p>
-
-					{/* Always visible: status + technologies */}
-					<div className="flex flex-wrap gap-2">
-						<span className="rounded-full border border-aperture-yellow/60 bg-aperture-yellow/10 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.2em] text-aperture-yellow">
-							{data.details?.status}
-						</span>
-					</div>
 				</div>
 
 				<div className="relative">
-					<IBMPCMonitor screenClassName="h-[280px]">
+					<IBMPCMonitor
+						screenClassName="h-[280px]"
+						currentScreen={screenIndex}
+						totalScreens={2}
+						onScreenChange={setScreenIndex}
+						onMouseEnter={() => setIsPaused(true)}
+						onMouseLeave={() => setIsPaused(false)}
+					>
 						<div className="relative h-[280px] w-full overflow-hidden rounded-[8px] bg-[#0b0b10]">
 							<div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(242,201,76,0.12),transparent_70%)]" />
 							<div className="absolute inset-0 border border-white/10" />
@@ -77,7 +79,11 @@ export default function CurrentlyWorkingOn({ data }: { data: ProjectPublication 
 								{screenIndex === 0 ? (
 									<motion.div
 										key="screen1"
-										className="relative z-10 h-full p-6 text-[#f0f0f0]"
+										className="relative z-10 h-full overflow-y-auto p-6 pr-3 text-[#f0f0f0]"
+										style={{
+											scrollbarWidth: "thin",
+											scrollbarColor: "rgba(242, 201, 76, 0.4) transparent",
+										}}
 										initial={{ opacity: 0, y: 12 }}
 										animate={{ opacity: 1, y: 0 }}
 										exit={{ opacity: 0, y: -12 }}
@@ -89,11 +95,11 @@ export default function CurrentlyWorkingOn({ data }: { data: ProjectPublication 
 										<div className="mt-3 space-y-2.5 text-xs text-zinc-200">
 											<div>
 												<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-500">Motivación</span>
-												<p className="mt-1 text-xs leading-5 text-zinc-300 line-clamp-2">{data.details?.why_i_built_this}</p>
+												<p className="mt-1 text-xs leading-5 text-zinc-300">{data.details?.why_i_built_this}</p>
 											</div>
 											<div>
 												<span className="font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-500">Proceso</span>
-												<p className="mt-1 text-xs leading-5 text-zinc-300 line-clamp-2">{data.details?.how_it_works}</p>
+												<p className="mt-1 text-xs leading-5 text-zinc-300">{data.details?.how_it_works}</p>
 											</div>
 											{(data.details?.what_i_learned ?? []).length > 0 && (
 												<div className="mt-2 space-y-1.5">
@@ -115,24 +121,41 @@ export default function CurrentlyWorkingOn({ data }: { data: ProjectPublication 
 								) : (
 									<motion.div
 										key="screen2"
-										className="relative z-10 h-full"
+										className="relative z-10 h-full w-full"
 										initial={{ opacity: 0, y: 12 }}
 										animate={{ opacity: 1, y: 0 }}
 										exit={{ opacity: 0, y: -12 }}
 										transition={{ duration: 0.5 }}
 									>
 										{data.image_path ? (
-											<>
-												<img src={data.image_path} alt={data.image_description || data.title}
-													className="h-full w-full object-cover" />
+											<div className="relative flex h-full w-full items-center justify-center bg-black/60">
+												<img
+													src={data.image_path}
+													alt={data.image_description || data.title}
+													className="h-full w-full object-contain"
+												/>
 												{data.image_description && (
-													<div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-														<p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-300">
-															{data.image_description}
-														</p>
+													<div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center justify-end pb-3">
+														{/* Sombra difuminada triangular */}
+														<div
+															className="absolute bottom-0 h-28 w-full max-w-lg"
+															style={{
+																background:
+																	"radial-gradient(ellipse at bottom, rgba(0, 0, 0, 0.96) 20%, rgba(0, 0, 0, 0.85) 60%, rgba(0, 0, 0, 0) 100%)",
+																clipPath: "polygon(0% 100%, 100% 100%, 82% 0%, 18% 0%)",
+																filter: "blur(6px)",
+															}}
+														/>
+														<div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/95 via-black/70 to-transparent" />
+
+														<div className="relative z-10 max-w-xl px-6 text-center">
+															<p className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-white drop-shadow-[0_2px_4px_rgba(0,0,0,1)] sm:text-[11px]">
+																{data.image_description}
+															</p>
+														</div>
 													</div>
 												)}
-											</>
+											</div>
 										) : (
 											<div className="flex h-full items-center justify-center">
 												<p className="font-mono text-[10px] text-zinc-600 uppercase tracking-[0.2em]">No image available</p>

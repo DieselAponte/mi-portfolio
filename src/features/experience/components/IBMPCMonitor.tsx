@@ -7,6 +7,11 @@ interface IBMPCMonitorProps {
 	className?: string;
 	screenClassName?: string;
 	label?: string;
+	currentScreen?: number;
+	totalScreens?: number;
+	onScreenChange?: (index: number) => void;
+	onMouseEnter?: () => void;
+	onMouseLeave?: () => void;
 }
 
 const joinClassNames = (...classes: Array<string | undefined>) =>
@@ -17,9 +22,18 @@ export default function IBMPCMonitor({
 	className,
 	screenClassName,
 	label = "IBM PC MONITOR",
+	currentScreen,
+	totalScreens = 2,
+	onScreenChange,
+	onMouseEnter,
+	onMouseLeave,
 }: IBMPCMonitorProps) {
 	return (
-		<div className={joinClassNames("relative", className)}>
+		<div
+			className={joinClassNames("relative", className)}
+			onMouseEnter={onMouseEnter}
+			onMouseLeave={onMouseLeave}
+		>
 			<div className="relative rounded-[18px] border border-white/10 bg-[#1a1a1a] p-4 shadow-[0_24px_60px_rgba(0,0,0,0.55)]">
 				<div className="relative rounded-[14px] border border-white/10 bg-[#0f0f0f] p-3 shadow-[inset_0_0_40px_rgba(0,0,0,0.85)]">
 					<div
@@ -29,7 +43,7 @@ export default function IBMPCMonitor({
 						)}
 						style={{ animation: "monitorFlicker 6s ease-in-out infinite" }}
 					>
-						<div className="relative z-10">{children}</div>
+						<div className="relative z-10 h-full">{children}</div>
 
 						<div
 							className="absolute inset-0 pointer-events-none"
@@ -48,6 +62,31 @@ export default function IBMPCMonitor({
 
 					<div className="mt-3 flex items-center justify-between text-[10px] font-mono text-[#f0f0f0]/60">
 						<span>{label}</span>
+
+						{/* Viñetas manuales para pivotear entre ambas pantallas */}
+						{typeof currentScreen === "number" && totalScreens > 1 && onScreenChange && (
+							<div className="flex items-center gap-2">
+								{Array.from({ length: totalScreens }).map((_, idx) => (
+									<button
+										key={idx}
+										type="button"
+										onClick={(e) => {
+											e.stopPropagation();
+											onScreenChange(idx);
+										}}
+										title={idx === 0 ? "Información de sistema" : "Captura visual"}
+										aria-label={`Ver pantalla ${idx + 1}`}
+										className={joinClassNames(
+											"h-2 rounded-full transition-all duration-300 focus:outline-none cursor-pointer",
+											currentScreen === idx
+												? "w-6 bg-aperture-yellow shadow-[0_0_10px_rgba(242,201,76,0.7)]"
+												: "w-2 bg-white/25 hover:bg-white/60",
+										)}
+									/>
+								))}
+							</div>
+						)}
+
 						<span>CRT ACTIVE</span>
 					</div>
 				</div>
