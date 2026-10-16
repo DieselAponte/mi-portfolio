@@ -29,9 +29,9 @@ interface OnboardingAddProps {
         achievements?: string[],
         onProgress?: (status: "optimizing" | "uploading" | "saving") => void
     ) => Promise<void>;
-    onAddTechnology: (name: string) => Promise<void>;
+    onAddTechnology: (name: string) => Promise<Technology>;
     onDeleteTechnology: (id: string | number) => Promise<void>;
-    onAddTopic: (name: string) => Promise<void>;
+    onAddTopic: (name: string) => Promise<Topic>;
     onDeleteTopic: (id: string | number) => Promise<void>;
     onCancel: () => void;
 }
@@ -79,6 +79,27 @@ export const OnboardingAddNivelPublicacion = ({
     const toggleTopic = (id: string | number) => {
         setSelectedTopicIds((prev) => prev.some((t) => String(t) === String(id)) ? prev.filter((t) => String(t) !== String(id)) : [...prev, id]);
     };
+
+    const handleAddTechnology = async (name: string): Promise<Technology> => {
+        const newTech = await onAddTechnology(name);
+        if (newTech?.id) {
+            setSelectedTechIds((prev) =>
+                prev.some((id) => String(id) === String(newTech.id)) ? prev : [...prev, newTech.id]
+            );
+        }
+        return newTech;
+    };
+
+    const handleAddTopic = async (name: string): Promise<Topic> => {
+        const newTopic = await onAddTopic(name);
+        if (newTopic?.id) {
+            setSelectedTopicIds((prev) =>
+                prev.some((id) => String(id) === String(newTopic.id)) ? prev : [...prev, newTopic.id]
+            );
+        }
+        return newTopic;
+    };
+
     const handleImageChange = (file: File | null, preview: string | null) => {
         setImageFile(file);
         setImagePreview(preview);
@@ -196,8 +217,8 @@ export const OnboardingAddNivelPublicacion = ({
                         technologies={technologies} topics={topics}
                         onImageChange={handleImageChange} onImageDescriptionChange={setImageDescription}
                         onSkillsChange={setSkillsLearned} onTopicToggle={toggleTopic} onTechToggle={toggleTech}
-                        onAddTechnology={onAddTechnology} onDeleteTechnology={onDeleteTechnology}
-                        onAddTopic={onAddTopic} onDeleteTopic={onDeleteTopic}
+                        onAddTechnology={handleAddTechnology} onDeleteTechnology={onDeleteTechnology}
+                        onAddTopic={handleAddTopic} onDeleteTopic={onDeleteTopic}
                         onSubmit={handleFinalSubmit} isSubmitting={isSubmitting} submitStatus={submitStatus} error={error}
                     />
                 )}
@@ -207,7 +228,7 @@ export const OnboardingAddNivelPublicacion = ({
                         status={projStatus} selectedTechIds={selectedTechIds} technologies={technologies}
                         onImageChange={handleImageChange} onImageDescriptionChange={setImageDescription}
                         onStatusChange={setProjStatus} onTechToggle={toggleTech}
-                        onAddTechnology={onAddTechnology} onDeleteTechnology={onDeleteTechnology}
+                        onAddTechnology={handleAddTechnology} onDeleteTechnology={onDeleteTechnology}
                         onSubmit={handleFinalSubmit} isSubmitting={isSubmitting} submitStatus={submitStatus} error={error}
                     />
                 )}
@@ -218,7 +239,7 @@ export const OnboardingAddNivelPublicacion = ({
                         selectedTechIds={selectedTechIds} technologies={technologies}
                         onImageChange={handleImageChange} onImageDescriptionChange={setImageDescription}
                         onResponsibilitiesChange={setResponsibilities} onAchievementsChange={setAchievements}
-                        onTechToggle={toggleTech} onAddTechnology={onAddTechnology} onDeleteTechnology={onDeleteTechnology}
+                        onTechToggle={toggleTech} onAddTechnology={handleAddTechnology} onDeleteTechnology={onDeleteTechnology}
                         onSubmit={handleFinalSubmit} isSubmitting={isSubmitting} submitStatus={submitStatus} error={error}
                     />
                 )}

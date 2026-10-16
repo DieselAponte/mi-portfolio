@@ -30,9 +30,9 @@ interface OnboardingEditProps {
         onProgress?: (status: "optimizing" | "uploading" | "saving") => void
     ) => Promise<void>;
     onDelete: () => void;
-    onAddTechnology: (name: string) => Promise<void>;
+    onAddTechnology: (name: string) => Promise<Technology>;
     onDeleteTechnology: (id: string | number) => Promise<void>;
-    onAddTopic: (name: string) => Promise<void>;
+    onAddTopic: (name: string) => Promise<Topic>;
     onDeleteTopic: (id: string | number) => Promise<void>;
     onCancel: () => void;
 }
@@ -59,10 +59,10 @@ export const OnboardingEditNivelPublicacion = ({
     const [imagePreview, setImagePreview] = useState<string | null>(publication.image_path || null);
     const [imageDescription, setImageDescription] = useState(publication.image_description || "");
     const [selectedTechIds, setSelectedTechIds] = useState<(string | number)[]>(
-        (publication.technologies ?? []).map((t: any) => t.id)
+        (publication.technologies ?? []).map((t: Technology) => t.id)
     );
     const [selectedTopicIds, setSelectedTopicIds] = useState<(string | number)[]>(
-        (publication.topics ?? []).map((t: any) => t.id)
+        (publication.topics ?? []).map((t: Topic) => t.id)
     );
 
     // Education state
@@ -99,14 +99,35 @@ export const OnboardingEditNivelPublicacion = ({
         company: expPub?.details?.company ?? "",
     });
     const [responsibilities, setResponsibilities] = useState<string[]>(
-        expPub?.responsibilities?.map((r: any) => r.content) ?? ["", "", ""]
+        expPub?.responsibilities?.map((r) => r.content) ?? ["", "", ""]
     );
     const [achievements, setAchievements] = useState<string[]>(
-        expPub?.achievements?.map((a: any) => a.content) ?? ["", "", ""]
+        expPub?.achievements?.map((a) => a.content) ?? ["", "", ""]
     );
 
     const toggleTech = (id: string | number) => setSelectedTechIds((p) => p.some((t) => String(t) === String(id)) ? p.filter((t) => String(t) !== String(id)) : [...p, id]);
     const toggleTopic = (id: string | number) => setSelectedTopicIds((p) => p.some((t) => String(t) === String(id)) ? p.filter((t) => String(t) !== String(id)) : [...p, id]);
+
+    const handleAddTechnology = async (name: string): Promise<Technology> => {
+        const newTech = await onAddTechnology(name);
+        if (newTech?.id) {
+            setSelectedTechIds((p) =>
+                p.some((id) => String(id) === String(newTech.id)) ? p : [...p, newTech.id]
+            );
+        }
+        return newTech;
+    };
+
+    const handleAddTopic = async (name: string): Promise<Topic> => {
+        const newTopic = await onAddTopic(name);
+        if (newTopic?.id) {
+            setSelectedTopicIds((p) =>
+                p.some((id) => String(id) === String(newTopic.id)) ? p : [...p, newTopic.id]
+            );
+        }
+        return newTopic;
+    };
+
     const handleImageChange = (file: File | null, preview: string | null) => { setImageFile(file); setImagePreview(preview); };
 
     const handleStep1Continue = () => {
@@ -218,8 +239,8 @@ export const OnboardingEditNivelPublicacion = ({
                         technologies={technologies} topics={topics}
                         onImageChange={handleImageChange} onImageDescriptionChange={setImageDescription}
                         onSkillsChange={setSkillsLearned} onTopicToggle={toggleTopic} onTechToggle={toggleTech}
-                        onAddTechnology={onAddTechnology} onDeleteTechnology={onDeleteTechnology}
-                        onAddTopic={onAddTopic} onDeleteTopic={onDeleteTopic}
+                        onAddTechnology={handleAddTechnology} onDeleteTechnology={onDeleteTechnology}
+                        onAddTopic={handleAddTopic} onDeleteTopic={onDeleteTopic}
                         onBack={() => setStep("step1")} onSave={handleSave} isSaving={isSaving} error={error}
                     />
                 )}
@@ -234,7 +255,7 @@ export const OnboardingEditNivelPublicacion = ({
                         status={projStatus} selectedTechIds={selectedTechIds} technologies={technologies}
                         onImageChange={handleImageChange} onImageDescriptionChange={setImageDescription}
                         onStatusChange={setProjStatus} onTechToggle={toggleTech}
-                        onAddTechnology={onAddTechnology} onDeleteTechnology={onDeleteTechnology}
+                        onAddTechnology={handleAddTechnology} onDeleteTechnology={onDeleteTechnology}
                         onBack={() => setStep("step1")} onSave={handleSave} isSaving={isSaving} error={error}
                     />
                 )}
@@ -250,7 +271,7 @@ export const OnboardingEditNivelPublicacion = ({
                         selectedTechIds={selectedTechIds} technologies={technologies}
                         onImageChange={handleImageChange} onImageDescriptionChange={setImageDescription}
                         onResponsibilitiesChange={setResponsibilities} onAchievementsChange={setAchievements}
-                        onTechToggle={toggleTech} onAddTechnology={onAddTechnology} onDeleteTechnology={onDeleteTechnology}
+                        onTechToggle={toggleTech} onAddTechnology={handleAddTechnology} onDeleteTechnology={onDeleteTechnology}
                         onBack={() => setStep("step1")} onSave={handleSave} isSaving={isSaving} error={error}
                     />
                 )}

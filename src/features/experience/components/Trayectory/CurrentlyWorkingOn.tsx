@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import IBMPCMonitor from "../IBMPCMonitor";
 import PortalPanel from "../PortalPanel";
-import type { ProjectPublication } from "../../types";
+import { type ProjectPublication, mapProjectStatusToTrajectory } from "../../types";
 
 // Generate floating bubble positions from technologies
 const generateBubblePositions = (count: number) => {
@@ -39,9 +39,7 @@ export default function CurrentlyWorkingOn({ data }: { data: ProjectPublication 
 			<div className="self-start hidden md:block md:sticky md:top-24">
 				<PortalPanel
 					id={String(data.id).padStart(2, "0")}
-					title={data.title}
-					subtitle={data.description}
-					status="IN PROGRESS"
+					status={mapProjectStatusToTrajectory(data.details?.status)}
 				/>
 			</div>
 

@@ -16,12 +16,10 @@ const joinClassNames = (...classes: Array<string | undefined>) =>
   classes.filter(Boolean).join(" ");
 
 const BARCODE_HEIGHT = 28;
-const BARCODE_WIDTH = 3;
-const BARCODE_COUNT = 36;
+const BARCODE_COUNT = 44;
 
 const createBarcode = () =>
   Array.from({ length: BARCODE_COUNT }).map(() => ({
-    width: BARCODE_WIDTH,
     height: BARCODE_HEIGHT,
   }));
 
@@ -29,20 +27,20 @@ const renderPictogram = (index: number) => {
   const variant = index % 4;
 
   if (variant === 0) {
-    return <div className="h-3 w-3 bg-black/50" />;
+    return <div className="h-3.5 w-3.5 bg-black/60" />;
   }
 
   if (variant === 1) {
-    return <div className="h-3 w-3 rounded-full bg-black/50" />;
+    return <div className="h-3.5 w-3.5 rounded-full bg-black/60" />;
   }
 
   if (variant === 2) {
-    return <div className="h-3 w-3 rotate-45 bg-black/50" />;
+    return <div className="h-3.5 w-3.5 rotate-45 bg-black/60" />;
   }
 
   return (
     <div
-      className="h-3 w-3 bg-black/50"
+      className="h-3.5 w-3.5 bg-black/60"
       style={{ clipPath: "polygon(0 0, 100% 50%, 0 100%)" }}
     />
   );
@@ -50,8 +48,6 @@ const renderPictogram = (index: number) => {
 
 export default function PortalPanel({
   id = "01",
-  title = "Computer Science",
-  subtitle = "Aperture Education Initiative",
   status = "COMPLETED",
   className,
 }: PortalPanelProps) {
@@ -148,12 +144,13 @@ export default function PortalPanel({
   return (
     <motion.div
       className={joinClassNames(
-        "relative group h-[520px] w-[260px] overflow-hidden rounded-[6px] border border-black/20 bg-[#f0f0f0] text-black shadow-[0_0_22px_rgba(0,0,0,0.25)] md:h-[560px] md:w-[280px] lg:h-[620px] lg:w-[320px]",
+        "relative group h-[520px] w-[260px] overflow-hidden rounded-[8px] border-2 border-black/25 bg-[#f4f4f4] text-black shadow-[0_0_30px_rgba(0,0,0,0.3)] md:h-[560px] md:w-[280px] lg:h-[620px] lg:w-[320px]",
         className,
       )}
       animate={panelControls}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(120%_120%_at_20%_0%,#ffffff_0%,#f0f0f0_40%,#e6e6e6_100%)]" />
+      {/* Background gradients and authentic textures */}
+      <div className="absolute inset-0 bg-[radial-gradient(120%_120%_at_20%_0%,#ffffff_0%,#f2f2f2_45%,#e4e4e4_100%)]" />
 
       <div
         className={joinClassNames(
@@ -165,21 +162,13 @@ export default function PortalPanel({
       </div>
 
       <div className="absolute inset-0 pointer-events-none opacity-[0.08] bg-[linear-gradient(to_bottom,transparent_0%,transparent_50%,black_51%,transparent_52%)] bg-[length:100%_4px]" />
-
       <div className="absolute inset-0 pointer-events-none opacity-[0.04] mix-blend-multiply bg-[url('https://www.transparenttextures.com/patterns/asfalt-dark.png')]" />
+      <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_35px_rgba(0,0,0,0.2)]" />
 
-      <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_40px_rgba(0,0,0,0.25)]" />
-
-      <div className="absolute left-6 right-6 top-6 flex items-center justify-between">
-        <div className="text-[10px] font-mono tracking-[0.45em] text-black/70">
-          APERTURE LABS
-        </div>
-        <div className="text-[10px] font-mono text-black/60">{title}</div>
-      </div>
-
-      <div className="absolute top-16 left-1/2 -translate-x-1/2">
+      {/* Main Chamber Large Numbers */}
+      <div className="absolute top-12 left-1/2 -translate-x-1/2">
         <motion.h1
-          className="text-[12rem] font-black leading-none tracking-[-8px] text-black"
+          className="text-[11.5rem] md:text-[12.5rem] lg:text-[14rem] font-black leading-none tracking-[-8px] text-black select-none"
           style={{ fontFamily: "DIN, Helvetica, Arial, sans-serif" }}
           animate={numberControls}
         >
@@ -187,29 +176,33 @@ export default function PortalPanel({
         </motion.h1>
       </div>
 
-      <div className="absolute top-[300px] right-0 z-10 h-[2px] w-[74%] bg-black/70" />
-
-      <div className="absolute top-[328px] left-6 z-10 w-[75%]">
-        <div className="mb-2 text-sm font-mono font-semibold tracking-wider">
-          {id}/{id}
+      {/* Barcode section: Aligned towards the right edge with a small margin */}
+      <div className="absolute top-[315px] left-6 right-5 z-10">
+        <div className="mb-1 text-xs font-mono font-bold tracking-wider text-black/80">
+          {id}/03
         </div>
-        <div className="flex h-8 items-end justify-between">
+        <div className="w-full border-t-[1.5px] border-black/80 mb-0.5" />
+        <div className="flex h-7 items-end justify-between gap-[2px]">
           {barcodeBars.map((bar, index) => (
             <div
               key={`${index}-${bar.height}`}
-              className="bg-black"
-              style={{ width: `${bar.width}px`, height: `${bar.height}px` }}
+              className="bg-black flex-1"
+              style={{ maxWidth: "4px", minWidth: "2px", height: `${bar.height}px` }}
             />
           ))}
         </div>
       </div>
 
+      {/* Horizontal divider line above pictograms */}
+      <div className="absolute top-[375px] left-6 right-5 z-10 h-[1.5px] bg-black/70" />
+
+      {/* Pictograms / Danger Sign Grid */}
       <div className="absolute bottom-20 left-6 right-6 z-20">
         <div className="grid grid-cols-6 gap-2">
           {pictograms.map((index) => (
             <div
               key={index}
-              className="flex aspect-square items-center justify-center border border-black/20 bg-black/5"
+              className="flex aspect-square items-center justify-center border border-black/25 bg-black/5"
             >
               {renderPictogram(index)}
             </div>
@@ -217,33 +210,34 @@ export default function PortalPanel({
         </div>
       </div>
 
-      <div className="absolute bottom-8 left-6 right-6 flex items-end justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="relative h-5 w-5 rounded-full border border-black/60">
-              <div className="absolute inset-[3px] border-l-2 border-black/70 rotate-[35deg]" />
-            </div>
-            <p className="text-[10px] font-mono tracking-[0.35em]">
-              APERTURE
-            </p>
+      {/* Bottom Bar: Iconic Aperture logo on left, Status badge on right */}
+      <div className="absolute bottom-7 left-6 right-6 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="relative flex h-5 w-5 items-center justify-center rounded-full border border-black/80">
+            <div className="h-2 w-2 rounded-full border border-black/70" />
+            <div className="absolute inset-[2px] rotate-45 border-l border-black/80" />
           </div>
-          <p className="mt-2 text-[10px] font-mono text-black/60">
-            {subtitle}
+          <p className="font-mono text-[10px] font-bold tracking-[0.25em] text-black/85">
+            APERTURE <span className="font-light tracking-[0.15em] text-[8px] hidden sm:inline">LABORATORIES</span>
           </p>
         </div>
 
+        {/* Status Badge with Neon Blue for ACTIVE */}
         <div
           className={joinClassNames(
-            "px-2 py-1 text-xs font-mono font-bold tracking-widest border",
+            "px-2.5 py-1 text-xs font-mono font-bold tracking-widest border transition-all",
             status === "COMPLETED"
-              ? "border-green-600 text-green-700"
-              : "border-orange-500 text-orange-600",
+              ? "border-emerald-600 bg-emerald-500/10 text-emerald-700"
+              : status === "ACTIVE"
+              ? "border-[#00c8ff] bg-[#00c8ff]/15 text-[#007ba7] shadow-[0_0_14px_rgba(0,200,255,0.45)]"
+              : "border-orange-500 bg-orange-500/10 text-orange-600",
           )}
         >
           {status}
         </div>
       </div>
 
+      {/* Hover illumination */}
       <div className="absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-500 group-hover:opacity-100">
         <div className="absolute -inset-10 bg-gradient-to-r from-[#56ccf2]/10 via-white/10 to-[#56ccf2]/5 blur-3xl" />
       </div>

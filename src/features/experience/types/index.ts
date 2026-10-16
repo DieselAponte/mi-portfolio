@@ -1,5 +1,17 @@
 export type TrajectoryStatus = "COMPLETED" | "IN PROGRESS" | "ACTIVE";
 
+export function mapProjectStatusToTrajectory(status?: string): TrajectoryStatus {
+	if (!status) return "IN PROGRESS";
+	const s = status.trim().toLowerCase();
+	if (s.includes("terminado") || s.includes("completed")) {
+		return "COMPLETED";
+	}
+	if (s.includes("activo") || s.includes("active")) {
+		return "ACTIVE";
+	}
+	return "IN PROGRESS";
+}
+
 export interface TrajectoryPanelData {
 	id: string | number;
 	title: string;

@@ -9,7 +9,7 @@ interface TechTopicSelectorProps {
     items: (Technology | Topic)[];
     selectedIds: (string | number)[];
     onToggle: (id: string | number) => void;
-    onAdd: (name: string) => Promise<void>;
+    onAdd: (name: string) => Promise<Technology | Topic | void>;
     onDelete: (id: string | number) => Promise<void>;
     type: "technology" | "topic";
 }
@@ -31,7 +31,12 @@ export const TechTopicSelector = ({
         if (!newName.trim()) return;
         setIsSubmitting(true);
         try {
-            await onAdd(newName.trim());
+            const created = await onAdd(newName.trim());
+            if (created && typeof created === "object" && "id" in created) {
+                if (!selectedIds.some((sId) => String(sId) === String(created.id))) {
+                    onToggle(created.id);
+                }
+            }
             setNewName("");
             setIsAddingNew(false);
         } catch (err) {

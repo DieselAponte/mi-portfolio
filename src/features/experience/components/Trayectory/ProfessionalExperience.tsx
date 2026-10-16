@@ -37,8 +37,6 @@ export default function Experience({ data }: { data: ExperiencePublication[] }) 
 			<div className="self-start hidden md:block md:sticky md:top-24">
 				<PortalPanel
 					id={String(activePub.id).padStart(2, "0")}
-					title={activePub.title}
-					subtitle={activePub.details?.company ?? ""}
 					status="ACTIVE"
 				/>
 			</div>

@@ -17,7 +17,7 @@ interface AddPicsAdditionalInfoProjectProps {
     onImageDescriptionChange: (desc: string) => void;
     onStatusChange: (status: ProjectStatus) => void;
     onTechToggle: (id: string | number) => void;
-    onAddTechnology: (name: string) => Promise<void>;
+    onAddTechnology: (name: string) => Promise<Technology | void>;
     onDeleteTechnology: (id: string | number) => Promise<void>;
     onSubmit: () => void;
     isSubmitting: boolean;

@@ -22,8 +22,6 @@ export default function College({ data }: { data: EducationPublication }) {
 			<div className="self-start hidden md:block md:sticky md:top-24">
 				<PortalPanel
 					id={String(data.id).padStart(2, "0")}
-					title={data.title}
-					subtitle={data.details?.institution ?? ""}
 					status="COMPLETED"
 				/>
 			</div>

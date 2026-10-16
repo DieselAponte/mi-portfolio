@@ -77,6 +77,17 @@ export const ExperienceCRUDContainer = ({
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);
   const [popup, setPopup] = useState<PopupState>({ type: "none" });
 
+  const [technologiesList, setTechnologiesList] = useState<Technology[]>(technologies);
+  const [topicsList, setTopicsList] = useState<Topic[]>(topics);
+
+  useEffect(() => {
+    setTechnologiesList(technologies);
+  }, [technologies]);
+
+  useEffect(() => {
+    setTopicsList(topics);
+  }, [topics]);
+
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     if (!authLoading) {
@@ -228,20 +239,30 @@ export const ExperienceCRUDContainer = ({
     router.refresh();
   };
 
-  const handleAddTech = async (name: string) => {
-    await addTechnology({ name, sector: "Custom" });
+  const handleAddTech = async (name: string): Promise<Technology> => {
+    const tech = await addTechnology({ name, sector: "Custom" });
+    setTechnologiesList((prev) =>
+      prev.some((t) => String(t.id) === String(tech.id)) ? prev : [...prev, tech]
+    );
     router.refresh();
+    return tech;
   };
   const handleDeleteTech = async (id: string | number) => {
     await deleteServiceTechnology(id);
+    setTechnologiesList((prev) => prev.filter((t) => String(t.id) !== String(id)));
     router.refresh();
   };
-  const handleAddTopicItem = async (name: string) => {
-    await addTopic(name);
+  const handleAddTopicItem = async (name: string): Promise<Topic> => {
+    const topic = await addTopic(name);
+    setTopicsList((prev) =>
+      prev.some((t) => String(t.id) === String(topic.id)) ? prev : [...prev, topic]
+    );
     router.refresh();
+    return topic;
   };
   const handleDeleteTopicItem = async (id: string | number) => {
     await deleteServiceTopic(id);
+    setTopicsList((prev) => prev.filter((t) => String(t.id) !== String(id)));
     router.refresh();
   };
 
@@ -324,12 +345,12 @@ export const ExperienceCRUDContainer = ({
 
       {/* Popups — Section 2 */}
       {popup.type === "addPublicacion" && (
-        <OnboardingAddNivelPublicacion technologies={technologies} topics={topics} currentCount={publicaciones.length}
+        <OnboardingAddNivelPublicacion technologies={technologiesList} topics={topicsList} currentCount={publicaciones.length}
           onSubmit={handleAddPublicacion} onAddTechnology={handleAddTech} onDeleteTechnology={handleDeleteTech}
           onAddTopic={handleAddTopicItem} onDeleteTopic={handleDeleteTopicItem} onCancel={closePopup} />
       )}
       {popup.type === "editPublicacion" && (
-        <OnboardingEditNivelPublicacion publication={popup.pub} technologies={technologies} topics={topics}
+        <OnboardingEditNivelPublicacion publication={popup.pub} technologies={technologiesList} topics={topicsList}
           onSave={handleUpdatePublicacion} onDelete={() => setPopup({ type: "deletePublicacion", pub: popup.pub })}
           onAddTechnology={handleAddTech} onDeleteTechnology={handleDeleteTech}
           onAddTopic={handleAddTopicItem} onDeleteTopic={handleDeleteTopicItem} onCancel={closePopup} />
