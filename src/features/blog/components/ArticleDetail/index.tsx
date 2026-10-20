@@ -13,6 +13,7 @@ import {
   Share2,
 } from "lucide-react";
 import type { BlogArticle } from "../../types";
+import { BlogImageBackground } from "../BlogImageBackground";
 
 interface ArticleDetailProps {
   article: BlogArticle;
@@ -69,14 +70,11 @@ export const ArticleDetail = ({ article }: ArticleDetailProps) => {
   };
 
   return (
-    <article className="min-h-screen bg-[#0a0a0c] text-zinc-200">
-      {/* Ambient background lighting */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-40 left-1/2 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-aperture-blue/10 blur-[140px]" />
-        <div className="absolute top-1/2 -right-40 h-[450px] w-[500px] rounded-full bg-aperture-yellow/5 blur-[130px]" />
-      </div>
+    <article className="relative min-h-screen text-zinc-200">
+      {/* Translucent cinematic Cave Johnson Office background image */}
+      <BlogImageBackground overlayOpacity="bg-[#0a0a0c]/80" />
 
-      <div className="relative mx-auto max-w-4xl px-6 pb-28 pt-28">
+      <div className="relative z-10 mx-auto max-w-4xl px-6 pb-28 pt-28">
         {/* Breadcrumb */}
         <div className="mb-8 flex items-center justify-between">
           <Link

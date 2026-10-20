@@ -8,6 +8,7 @@ import { FilterNavigation } from "./FilterNavigation";
 import { HeaderTitle } from "./HeaderTitle";
 import { ListArticles } from "./ListArticles";
 import { TopArticles } from "./TopArticles";
+import { BlogImageBackground } from "./BlogImageBackground";
 
 type BlogContainerProps = {
 	articles?: BlogArticle[];
@@ -52,8 +53,9 @@ export default function BlogContainer({
 		availableTags.length > 0 ? ["all", ...availableTags] : fallbackTags;
 
 	return (
-		<div className="min-h-screen bg-[#0a0a0c] text-white">
-			<div className="mx-auto w-full max-w-6xl px-6 pb-16 pt-20">
+		<div className="relative min-h-screen text-white">
+			<BlogImageBackground overlayOpacity="bg-[#0a0a0c]/70" />
+			<div className="relative z-10 mx-auto w-full max-w-6xl px-6 pb-16 pt-20">
 				<HeaderTitle />
 
 				<div className="mt-10">
