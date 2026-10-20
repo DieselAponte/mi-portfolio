@@ -5,21 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import IBMPCMonitor from "../IBMPCMonitor";
 import PortalPanel from "../PortalPanel";
 import { type ProjectPublication, mapProjectStatusToTrajectory } from "../../types";
-
-// Generate floating bubble positions from technologies
-const generateBubblePositions = (count: number) => {
-	const positions = [
-		{ top: "5%", right: "-12%" },
-		{ top: "25%", right: "-18%" },
-		{ top: "50%", right: "-14%" },
-		{ top: "70%", right: "-10%" },
-		{ top: "15%", right: "-8%" },
-		{ top: "40%", right: "-20%" },
-		{ top: "60%", right: "-6%" },
-		{ top: "85%", right: "-16%" },
-	];
-	return positions.slice(0, count);
-};
+import { generateBubblePositions } from "../../utils/bubblePositions";
 
 export default function CurrentlyWorkingOn({ data }: { data: ProjectPublication }) {
 	const [screenIndex, setScreenIndex] = useState(0);
@@ -60,18 +46,32 @@ export default function CurrentlyWorkingOn({ data }: { data: ProjectPublication 
 					<p className="text-sm leading-7 text-zinc-300">
 						{data.description}
 					</p>
+
+					{/* Mobile visible bubbles */}
+					{techs.length > 0 && (
+						<div className="flex flex-wrap gap-2 md:hidden">
+							{techs.map((tech) => (
+								<span
+									key={tech.id}
+									className="rounded-full border border-aperture-yellow/70 bg-aperture-yellow/15 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.2em] text-aperture-yellow"
+								>
+									{tech.name}
+								</span>
+							))}
+						</div>
+					)}
 				</div>
 
 				<div className="relative">
 					<IBMPCMonitor
-						screenClassName="h-[280px]"
+						screenClassName="h-[350px]"
 						currentScreen={screenIndex}
 						totalScreens={2}
 						onScreenChange={setScreenIndex}
 						onMouseEnter={() => setIsPaused(true)}
 						onMouseLeave={() => setIsPaused(false)}
 					>
-						<div className="relative h-[280px] w-full overflow-hidden rounded-[8px] bg-[#0b0b10]">
+						<div className="relative h-[350px] w-full overflow-hidden rounded-[8px] bg-[#0b0b10]">
 							<div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(242,201,76,0.12),transparent_70%)]" />
 							<div className="absolute inset-0 border border-white/10" />
 
@@ -128,28 +128,16 @@ export default function CurrentlyWorkingOn({ data }: { data: ProjectPublication 
 										transition={{ duration: 0.5 }}
 									>
 										{data.image_path ? (
-											<div className="relative flex h-full w-full items-center justify-center bg-black/60">
+											<div className="relative h-full w-full overflow-hidden">
 												<img
 													src={data.image_path}
 													alt={data.image_description || data.title}
-													className="h-full w-full object-contain"
+													className="h-full w-full object-cover"
 												/>
 												{data.image_description && (
-													<div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col items-center justify-end pb-3">
-														{/* Sombra difuminada triangular */}
-														<div
-															className="absolute bottom-0 h-28 w-full max-w-lg"
-															style={{
-																background:
-																	"radial-gradient(ellipse at bottom, rgba(0, 0, 0, 0.96) 20%, rgba(0, 0, 0, 0.85) 60%, rgba(0, 0, 0, 0) 100%)",
-																clipPath: "polygon(0% 100%, 100% 100%, 82% 0%, 18% 0%)",
-																filter: "blur(6px)",
-															}}
-														/>
-														<div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/95 via-black/70 to-transparent" />
-
-														<div className="relative z-10 max-w-xl px-6 text-center">
-															<p className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-white drop-shadow-[0_2px_4px_rgba(0,0,0,1)] sm:text-[11px]">
+													<div className="pointer-events-none absolute inset-x-2 bottom-2 z-20">
+														<div className="w-full rounded-xl bg-black/80 px-4 py-2.5 backdrop-blur-md border border-white/10 shadow-lg">
+															<p className="font-mono text-[10px] sm:text-[11px] font-medium tracking-[0.16em] text-white text-left uppercase">
 																{data.image_description}
 															</p>
 														</div>

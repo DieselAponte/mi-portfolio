@@ -268,7 +268,7 @@ export default function PortalPanel({
           <img
             src="/icons/Aperture-Science-Emblem.png"
             alt="Aperture Laboratories"
-            className="h-5 w-5 object-contain select-none"
+            className="h-[25px] w-[25px] object-contain select-none"
           />
           <p className="font-mono text-[10px] font-bold tracking-[0.25em] text-black/85 select-none">
             APERTURE <span className="font-light tracking-[0.15em] text-[8px] hidden sm:inline">LABORATORIES</span>

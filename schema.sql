@@ -537,3 +537,6 @@ EXCEPTION WHEN undefined_table THEN
 END;
 $$;
 
+-- Reload PostgREST schema cache immediately
+NOTIFY pgrst, 'reload schema';
+
