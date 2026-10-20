@@ -18,6 +18,7 @@ import {
   addProject,
   updateProject,
   deleteProject,
+  fetchProjects,
 } from "../../projects/services/projects.service";
 
 type PopupState =
@@ -36,6 +37,32 @@ export const ProjectsCRUDContainer = ({ projects }: ProjectsCRUDContainerProps) 
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);
   const [popup, setPopup] = useState<PopupState>({ type: "none" });
+  const [projectList, setProjectList] = useState<Project[]>(projects);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  // Sync state whenever SSR prop updates
+  useEffect(() => {
+    setProjectList(projects);
+  }, [projects]);
+
+  const syncProjects = async () => {
+    setIsSyncing(true);
+    try {
+      const fresh = await fetchProjects({ bypassCache: true });
+      setProjectList(fresh);
+    } catch (err) {
+      console.error("Error al sincronizar proyectos:", err);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // Sync on mount if initial server props were empty to guarantee fresh state
+  useEffect(() => {
+    if (projects.length === 0) {
+      void syncProjects();
+    }
+  }, []);
 
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
@@ -93,6 +120,7 @@ export const ProjectsCRUDContainer = ({ projects }: ProjectsCRUDContainerProps) 
       throw err;
     }
 
+    await syncProjects();
     closePopup();
     router.refresh();
   };
@@ -132,7 +160,7 @@ export const ProjectsCRUDContainer = ({ projects }: ProjectsCRUDContainerProps) 
       await updateProject(id, updatedPayload);
 
       // If replacement succeeded and there was an old image, clean it up
-      const currentProject = projects.find((p) => p.id === id);
+      const currentProject = projectList.find((p) => p.id === id);
       if (
         newImagePath &&
         currentProject?.image_url &&
@@ -147,6 +175,7 @@ export const ProjectsCRUDContainer = ({ projects }: ProjectsCRUDContainerProps) 
       throw err;
     }
 
+    await syncProjects();
     closePopup();
     router.refresh();
   };
@@ -156,6 +185,7 @@ export const ProjectsCRUDContainer = ({ projects }: ProjectsCRUDContainerProps) 
       await deleteStorageAsset(project.image_url).catch(console.error);
     }
     await deleteProject(project.id);
+    await syncProjects();
     closePopup();
     router.refresh();
   };
@@ -215,7 +245,9 @@ export const ProjectsCRUDContainer = ({ projects }: ProjectsCRUDContainerProps) 
         {/* Projects Table Card */}
         <div className="rounded-2xl border border-aperture-gray/50 bg-aperture-dark/50 p-6 sm:p-8 backdrop-blur-sm">
           <ProjectsTableComponent
-            projects={projects}
+            projects={projectList}
+            isSyncing={isSyncing}
+            onSync={syncProjects}
             onAdd={() => setPopup({ type: "add" })}
             onEdit={(proj) => setPopup({ type: "edit", project: proj })}
             onDelete={(proj) => setPopup({ type: "delete", project: proj })}

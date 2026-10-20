@@ -37,6 +37,17 @@ interface ProjectDetailProps {
   project: Project;
 }
 
+const formatDate = (value: string) => {
+  if (!value) return "";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleDateString("es-ES", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
 export const ProjectDetail = ({ project }: ProjectDetailProps) => {
   const hasProblemSolution =
     Boolean(project.problem_statement) || Boolean(project.solution_statement);
@@ -79,7 +90,7 @@ export const ProjectDetail = ({ project }: ProjectDetailProps) => {
               Caso de Estudio // Aperture Labs
             </span>
             <span className="font-mono text-xs text-zinc-500">
-              {project.date}
+              {formatDate(project.date)}
             </span>
           </div>
 

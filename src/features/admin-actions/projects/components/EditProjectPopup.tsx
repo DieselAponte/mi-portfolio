@@ -27,9 +27,18 @@ export const EditProjectPopup = ({
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
 
+  const formatInitialDate = (rawDate: string) => {
+    if (!rawDate) return new Date().toISOString().split("T")[0];
+    const d = new Date(rawDate);
+    if (!Number.isNaN(d.getTime())) {
+      return d.toISOString().split("T")[0];
+    }
+    return new Date().toISOString().split("T")[0];
+  };
+
   // Tab 1: General
   const [title, setTitle] = useState(project.title);
-  const [date, setDate] = useState(project.date);
+  const [date, setDate] = useState(() => formatInitialDate(project.date));
   const [description, setDescription] = useState(project.description);
   const [githubUrl, setGithubUrl] = useState(project.github_url || "");
   const [liveDemoUrl, setLiveDemoUrl] = useState(project.live_demo_url || "");
@@ -118,10 +127,20 @@ export const EditProjectPopup = ({
     setIsSaving(true);
     setError("");
 
+    const toValidIsoTimestamp = (dateStr: string) => {
+      if (!dateStr.trim()) return new Date().toISOString();
+      if (dateStr.includes("T")) {
+        const d = new Date(dateStr);
+        return Number.isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+      }
+      const d = new Date(`${dateStr}T12:00:00.000Z`);
+      return Number.isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+    };
+
     try {
       const updates: Partial<Project> = {
         title: title.trim(),
-        date: date.trim() || "Reciente",
+        date: toValidIsoTimestamp(date),
         description: description.trim(),
         github_url: githubUrl.trim(),
         live_demo_url: liveDemoUrl.trim(),
@@ -217,15 +236,33 @@ export const EditProjectPopup = ({
               </div>
 
               <div>
-                <label className="mb-1 block font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
-                  Fecha o Periodo
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
+                    Fecha del Proyecto *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setDate(new Date().toISOString().split("T")[0])}
+                    className="font-mono text-[9px] uppercase tracking-wider text-aperture-blue hover:text-white transition"
+                  >
+                    Hoy
+                  </button>
+                </div>
                 <input
-                  type="text"
+                  type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full rounded-lg border border-aperture-gray bg-black/60 px-4 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition focus:border-aperture-blue"
+                  className="w-full rounded-lg border border-aperture-gray bg-black/60 px-4 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition focus:border-aperture-blue [color-scheme:dark] cursor-pointer"
                 />
+                <p className="mt-1 font-mono text-[10px] text-zinc-500">
+                  {date
+                    ? `Vista previa: ${new Date(date + "T00:00:00").toLocaleDateString("es-ES", {
+                        month: "short",
+                        year: "numeric",
+                        day: "numeric",
+                      })}`
+                    : "Selecciona una fecha"}
+                </p>
               </div>
             </div>
 

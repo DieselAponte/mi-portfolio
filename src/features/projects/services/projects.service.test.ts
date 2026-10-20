@@ -74,4 +74,15 @@ describe('Projects Service', () => {
     expect(result.length).toBe(1);
     expect(result[0].id).toBe('proj-1');
   });
+
+  it('fetchProjects should bypass cache when bypassCache is true', async () => {
+    const cachedData = [{ id: 'cached-proj-1', title: 'Cached Proj' }];
+    vi.mocked(safeRedisGet).mockResolvedValueOnce(JSON.stringify(cachedData));
+
+    const result = await fetchProjects({ bypassCache: true });
+
+    expect(safeRedisGet).not.toHaveBeenCalled();
+    expect(result.length).toBe(1);
+    expect(result[0].id).toBe('proj-1');
+  });
 });

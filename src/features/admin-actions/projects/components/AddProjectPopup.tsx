@@ -21,10 +21,7 @@ export const AddProjectPopup = ({ onAdd, onCancel }: AddProjectPopupProps) => {
 
   // Tab 1: General
   const [title, setTitle] = useState("");
-  const [date, setDate] = useState(() => {
-    const d = new Date();
-    return `${d.toLocaleString("default", { month: "short" })} ${d.getFullYear()}`;
-  });
+  const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [description, setDescription] = useState("");
   const [githubUrl, setGithubUrl] = useState("");
   const [liveDemoUrl, setLiveDemoUrl] = useState("");
@@ -105,11 +102,21 @@ export const AddProjectPopup = ({ onAdd, onCancel }: AddProjectPopupProps) => {
     setIsSaving(true);
     setError("");
 
+    const toValidIsoTimestamp = (dateStr: string) => {
+      if (!dateStr.trim()) return new Date().toISOString();
+      if (dateStr.includes("T")) {
+        const d = new Date(dateStr);
+        return Number.isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+      }
+      const d = new Date(`${dateStr}T12:00:00.000Z`);
+      return Number.isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+    };
+
     try {
       await onAdd(
         {
           title: title.trim(),
-          date: date.trim() || "Reciente",
+          date: toValidIsoTimestamp(date),
           description: description.trim(),
           image_url: "",
           github_url: githubUrl.trim(),
@@ -203,16 +210,33 @@ export const AddProjectPopup = ({ onAdd, onCancel }: AddProjectPopupProps) => {
               </div>
 
               <div>
-                <label className="mb-1 block font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
-                  Fecha o Periodo
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">
+                    Fecha del Proyecto *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setDate(new Date().toISOString().split("T")[0])}
+                    className="font-mono text-[9px] uppercase tracking-wider text-aperture-blue hover:text-white transition"
+                  >
+                    Hoy
+                  </button>
+                </div>
                 <input
-                  type="text"
+                  type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  placeholder="Ej: Oct 2026"
-                  className="w-full rounded-lg border border-aperture-gray bg-black/60 px-4 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition focus:border-aperture-blue"
+                  className="w-full rounded-lg border border-aperture-gray bg-black/60 px-4 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition focus:border-aperture-blue [color-scheme:dark] cursor-pointer"
                 />
+                <p className="mt-1 font-mono text-[10px] text-zinc-500">
+                  {date
+                    ? `Vista previa: ${new Date(date + "T00:00:00").toLocaleDateString("es-ES", {
+                        month: "short",
+                        year: "numeric",
+                        day: "numeric",
+                      })}`
+                    : "Selecciona una fecha"}
+                </p>
               </div>
             </div>
 

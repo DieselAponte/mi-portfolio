@@ -31,6 +31,7 @@ export type ProjectsQuery = {
 	limit?: number;
 	offset?: number;
 	techStack?: string[];
+	bypassCache?: boolean;
 };
 
 const CACHE_KEY_PREFIX = "projects:";
@@ -58,14 +59,17 @@ const mapRecordToProject = (record: ProjectRecord): Project => ({
 });
 
 export const fetchProjects = async (query?: ProjectsQuery): Promise<Project[]> => {
+	const shouldBypassCache = query?.bypassCache ?? false;
 	const cacheKey = `${CACHE_KEY_PREFIX}${JSON.stringify(query || {})}`;
-	const cached = await safeRedisGet(cacheKey);
 
-	if (cached) {
-		try {
-			return JSON.parse(cached);
-		} catch {
-			// si el json está corrupto, continúa a DB
+	if (!shouldBypassCache) {
+		const cached = await safeRedisGet(cacheKey);
+		if (cached) {
+			try {
+				return JSON.parse(cached);
+			} catch {
+				// si el json está corrupto, continúa a DB
+			}
 		}
 	}
 
@@ -91,7 +95,9 @@ export const fetchProjects = async (query?: ProjectsQuery): Promise<Project[]> =
 
 	const projects = (data as ProjectRecord[]).map(mapRecordToProject);
 
-	await safeRedisSet(cacheKey, CACHE_TTL, JSON.stringify(projects));
+	if (!shouldBypassCache) {
+		await safeRedisSet(cacheKey, CACHE_TTL, JSON.stringify(projects));
+	}
 
 	return projects;
 };
@@ -118,6 +124,8 @@ const invalidateProjectsCache = async (id?: string | number) => {
 	}
 	try {
 		revalidatePath("/projects");
+		revalidatePath("/admin/actions/projects");
+		revalidatePath("/admin/actions/projects", "page");
 		if (id) {
 			revalidatePath(`/projects/${id}`);
 		}
