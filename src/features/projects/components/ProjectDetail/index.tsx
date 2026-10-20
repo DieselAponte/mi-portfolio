@@ -17,6 +17,7 @@ import {
   Compass,
 } from "lucide-react";
 import type { Project } from "../../types";
+import { ProjectVideoBackground } from "../ProjectVideoBackground";
 
 const GithubIcon = ({ className = "h-4 w-4" }: { className?: string }) => (
   <svg
@@ -64,12 +65,9 @@ export const ProjectDetail = ({ project }: ProjectDetailProps) => {
     Boolean(project.next_steps);
 
   return (
-    <article className="min-h-screen bg-[#0a0a0c] text-zinc-200">
-      {/* Top ambient illumination */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-40 left-1/2 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-aperture-blue/10 blur-[130px]" />
-        <div className="absolute top-1/3 -right-40 h-[400px] w-[500px] rounded-full bg-aperture-yellow/5 blur-[120px]" />
-      </div>
+    <article className="min-h-screen bg-[#0a0a0c] text-zinc-200 relative">
+      {/* Translucent cinematic laboratory background video */}
+      <ProjectVideoBackground />
 
       <div className="relative mx-auto max-w-5xl px-6 pb-24 pt-28">
         {/* Navigation Breadcrumb */}

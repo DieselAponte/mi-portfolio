@@ -10,6 +10,7 @@ import type { Project } from "../types";
 import { HeaderTitle } from "./HeaderTitle";
 import { ProjectsList } from "./ProjectsList";
 import { TechFilters } from "./TechFilters";
+import { ProjectVideoBackground } from "./ProjectVideoBackground";
 
 const PAGE_LIMIT = 4;
 
@@ -100,8 +101,7 @@ export default function ProjectsContainer() {
 
   return (
     <main className="relative w-full overflow-hidden bg-[#0a0a0c] text-white">
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(86,204,242,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(86,204,242,0.08)_1px,transparent_1px)] bg-[size:48px_48px]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(86,204,242,0.18),transparent_60%)]" />
+      <ProjectVideoBackground />
       <section className="relative min-h-screen px-6 pb-20 pt-24">
         <div className="mx-auto w-full max-w-6xl space-y-12">
           <HeaderTitle />
