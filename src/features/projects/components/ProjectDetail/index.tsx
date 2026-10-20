@@ -66,8 +66,8 @@ export const ProjectDetail = ({ project }: ProjectDetailProps) => {
 
   return (
     <article className="relative min-h-screen text-zinc-200">
-      {/* Translucent cinematic laboratory background video */}
-      <ProjectVideoBackground />
+      {/* Translucent cinematic laboratory background video (15% más oscuro) */}
+      <ProjectVideoBackground overlayOpacity="bg-[#0a0a0c]/80" />
 
       <div className="relative z-10 mx-auto max-w-5xl px-6 pb-24 pt-28">
         {/* Navigation Breadcrumb */}
