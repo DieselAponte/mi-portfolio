@@ -65,11 +65,11 @@ export const ProjectDetail = ({ project }: ProjectDetailProps) => {
     Boolean(project.next_steps);
 
   return (
-    <article className="min-h-screen bg-[#0a0a0c] text-zinc-200 relative">
+    <article className="relative min-h-screen text-zinc-200">
       {/* Translucent cinematic laboratory background video */}
       <ProjectVideoBackground />
 
-      <div className="relative mx-auto max-w-5xl px-6 pb-24 pt-28">
+      <div className="relative z-10 mx-auto max-w-5xl px-6 pb-24 pt-28">
         {/* Navigation Breadcrumb */}
         <div className="mb-8">
           <Link

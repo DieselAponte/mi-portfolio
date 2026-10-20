@@ -100,9 +100,9 @@ export default function ProjectsContainer() {
   }, [error]);
 
   return (
-    <main className="relative w-full overflow-hidden bg-[#0a0a0c] text-white">
+    <main className="relative w-full overflow-hidden text-white">
       <ProjectVideoBackground />
-      <section className="relative min-h-screen px-6 pb-20 pt-24">
+      <section className="relative z-10 min-h-screen px-6 pb-20 pt-24">
         <div className="mx-auto w-full max-w-6xl space-y-12">
           <HeaderTitle />
 
