@@ -54,7 +54,7 @@ export default function BlogContainer({
 
 	return (
 		<div className="relative min-h-screen text-white">
-			<BlogImageBackground overlayOpacity="bg-[#0a0a0c]/70" />
+			<BlogImageBackground overlayOpacity="bg-[#0a0a0c]/40" imageOpacity="opacity-40" />
 			<div className="relative z-10 mx-auto w-full max-w-6xl px-6 pb-16 pt-20">
 				<HeaderTitle />
 

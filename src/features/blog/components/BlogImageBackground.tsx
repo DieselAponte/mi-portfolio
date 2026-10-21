@@ -6,12 +6,14 @@ interface BlogImageBackgroundProps {
   imageSrc?: string;
   overlayOpacity?: string;
   blurStrength?: string;
+  imageOpacity?: string;
 }
 
 export const BlogImageBackground = ({
   imageSrc = "/images/cave-jhonson-office.png",
-  overlayOpacity = "bg-[#0a0a0c]/70",
+  overlayOpacity = "bg-[#0a0a0c]/40",
   blurStrength = "blur-[2.5px]",
+  imageOpacity = "opacity-40",
 }: BlogImageBackgroundProps) => {
   return (
     <div
@@ -26,7 +28,7 @@ export const BlogImageBackground = ({
         priority
         quality={80}
         sizes="100vw"
-        className={`object-cover scale-105 filter ${blurStrength} opacity-50`}
+        className={`object-cover scale-105 filter ${blurStrength} ${imageOpacity}`}
       />
 
       {/* Capa Traslúcida con Color de Fondo Base #0a0a0c */}

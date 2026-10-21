@@ -15,9 +15,13 @@ const footerLinks = {
   ],
 };
 
-export const Footer = () => {
+export interface FooterProps {
+  className?: string;
+}
+
+export const Footer = ({ className = "" }: FooterProps) => {
   return (
-    <footer className="border-t border-aperture-gray/60 bg-[#0a0a0c]">
+    <footer className={`relative z-10 border-t border-aperture-gray/60 bg-[#0a0a0c] ${className}`.trim()}>
       <div className="mx-auto w-full max-w-6xl px-6 py-12">
         <div className="grid gap-10 lg:grid-cols-[240px_1fr]">
           <div className="flex items-center gap-4">
