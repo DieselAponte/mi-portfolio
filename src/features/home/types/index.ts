@@ -15,3 +15,8 @@ export interface HomeService {
   order_index: number;
 }
 
+export interface HomeAbout {
+  id?: string | number;
+  image_url: string;
+  bio?: string;
+}

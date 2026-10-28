@@ -1,13 +1,24 @@
 export const dynamic = "force-dynamic";
 
 import { HomeContainer } from "../features/home/HomeContainer";
-import { fetchCasesOfStudy, fetchHomeServices } from "../features/home/services/home.service";
+import {
+  fetchCasesOfStudy,
+  fetchHomeServices,
+  fetchHomeAbout,
+} from "../features/home/services/home.service";
 
 export default async function Home() {
-  const [services, casesOfStudy] = await Promise.all([
+  const [services, casesOfStudy, about] = await Promise.all([
     fetchHomeServices(),
-    fetchCasesOfStudy()
+    fetchCasesOfStudy(),
+    fetchHomeAbout(),
   ]);
 
-  return <HomeContainer services={services} casesOfStudy={casesOfStudy} />;
+  return (
+    <HomeContainer
+      services={services}
+      casesOfStudy={casesOfStudy}
+      about={about}
+    />
+  );
 }

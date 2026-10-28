@@ -187,6 +187,18 @@ CREATE INDEX IF NOT EXISTS idx_home_cases_order ON public.home_cases_of_study (o
 COMMENT ON TABLE public.home_cases_of_study IS 'Cases-of-study section on the home page with image support.';
 
 -- =============================================================================
+-- 7b. home_about
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS public.home_about (
+    id          BIGINT PRIMARY KEY DEFAULT 1,
+    image_url   TEXT NOT NULL DEFAULT '',
+    bio         TEXT NOT NULL DEFAULT '',
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+COMMENT ON TABLE public.home_about IS 'About Me profile configuration including photo URL for home page.';
+
+-- =============================================================================
 -- 8. guestbook_notes
 -- =============================================================================
 CREATE TABLE IF NOT EXISTS public.guestbook_notes (

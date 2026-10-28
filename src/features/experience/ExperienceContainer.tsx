@@ -3,6 +3,7 @@ import HeroSection from "./components/ExperienceHeroSection";
 import College from "./components/Trayectory/College";
 import CurrentlyWorkingOn from "./components/Trayectory/CurrentlyWorkingOn";
 import Experience from "./components/Trayectory/ProfessionalExperience";
+import { Footer } from "../home/components/Footer";
 import { PublicationType } from "./types";
 import type { FullPublication, EducationPublication, ProjectPublication, ExperiencePublication, ExperienceCertification, ExperienceCarouselItem } from "./types";
 
@@ -61,6 +62,8 @@ export default function ExperienceContainer({ publicaciones, certifications, car
       </section>
 
       <Aspirations />
+
+      <Footer />
     </main>
   );
 }

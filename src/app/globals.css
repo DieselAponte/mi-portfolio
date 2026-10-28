@@ -29,6 +29,55 @@ body {
   }
 }
 
+/* Animación Neón para Timeline Cases of Study (Ciclo 12s: 6s ON, 2s transición a OFF, 2s OFF, 2s transición a ON) */
+@keyframes neonPulse {
+  0%,
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 6px #00e5ff) drop-shadow(0 0 14px rgba(0, 229, 255, 0.7));
+    box-shadow: 0 0 10px #00e5ff, 0 0 20px rgba(0, 229, 255, 0.6), inset 0 0 6px #00e5ff;
+    border-color: #38bdf8;
+  }
+  66.67%,
+  83.33% {
+    opacity: 0.25;
+    filter: drop-shadow(0 0 0px transparent);
+    box-shadow: none;
+    border-color: rgba(56, 189, 248, 0.2);
+  }
+  100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 6px #00e5ff) drop-shadow(0 0 14px rgba(0, 229, 255, 0.7));
+    box-shadow: 0 0 10px #00e5ff, 0 0 20px rgba(0, 229, 255, 0.6), inset 0 0 6px #00e5ff;
+    border-color: #38bdf8;
+  }
+}
+
+@keyframes neonLinePulse {
+  0%,
+  50% {
+    opacity: 0.85;
+    filter: drop-shadow(0 0 8px #00e5ff);
+  }
+  66.67%,
+  83.33% {
+    opacity: 0.15;
+    filter: drop-shadow(0 0 0px transparent);
+  }
+  100% {
+    opacity: 0.85;
+    filter: drop-shadow(0 0 8px #00e5ff);
+  }
+}
+
+.animate-neon-node {
+  animation: neonPulse 12s ease-in-out infinite;
+}
+
+.animate-neon-line {
+  animation: neonLinePulse 12s ease-in-out infinite;
+}
+
 /* Efecto de Scanline Cinematográfico */
 body::before {
   content: " ";
@@ -46,7 +95,7 @@ body::before {
     90deg,
     rgba(255, 0, 0, 0.02),
     rgba(0, 255, 0, 0.01),
-    rgba(0, 0, 255, 0.02)
+    rgba(0, 255, 0, 0.02)
   );
   z-index: 100;
   background-size: 100% 4px, 3px 100%;

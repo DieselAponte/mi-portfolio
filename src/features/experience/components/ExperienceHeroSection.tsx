@@ -22,7 +22,7 @@ const AutoCarousel = ({ items }: { items: ExperienceCarouselItem[] }) => {
 	const trackItems = [...items, ...items];
 
 	return (
-		<div className="relative w-full max-w-full overflow-hidden rounded-2xl border border-aperture-yellow/20 bg-[#10100b] p-4 shadow-[0_24px_60px_rgba(0,0,0,0.55)] sm:p-5">
+		<div className="relative w-full max-w-full overflow-hidden rounded-2xl border border-aperture-yellow/20 bg-[#10100b]/80 backdrop-blur-sm p-4 shadow-[0_24px_60px_rgba(0,0,0,0.55)] sm:p-5">
 			<div className="absolute inset-0 pointer-events-none opacity-[0.12] bg-[linear-gradient(to_bottom,transparent_0%,transparent_50%,black_51%,transparent_52%)] bg-[length:100%_4px]" />
 			<div className="absolute inset-0 pointer-events-none opacity-[0.08] bg-[radial-gradient(circle_at_top,rgba(242,201,76,0.2),transparent_60%)]" />
 			<div className="absolute inset-0 pointer-events-none opacity-[0.05] mix-blend-screen bg-[url('https://www.transparenttextures.com/patterns/asfalt-dark.png')]" />
@@ -69,15 +69,26 @@ const AutoCarousel = ({ items }: { items: ExperienceCarouselItem[] }) => {
 export default function HeroSection({ certifications, carouselItems }: HeroSectionProps) {
 	return (
 		<section className="relative min-h-screen w-full overflow-hidden px-6 pb-24 pt-28 sm:pt-32 lg:pt-36">
+			{/* Background Video */}
+			<div className="pointer-events-none absolute inset-0 -z-20 overflow-hidden">
+				<video
+					autoPlay
+					loop
+					muted
+					playsInline
+					preload="auto"
+					src="/videos/experience-wheatley-floating-background.mp4"
+					className="h-full w-full object-cover opacity-65"
+				/>
+			</div>
+			<div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-black/80 via-black/45 to-[#0a0a0c]" />
+
 			<div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(242,201,76,0.12),transparent_55%)]" />
 			<div className="pointer-events-none absolute inset-0 opacity-[0.06] bg-[linear-gradient(to_bottom,transparent_0%,transparent_50%,black_51%,transparent_52%)] bg-[length:100%_4px]" />
 
 			<div className="relative mx-auto w-full max-w-7xl">
 				<div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
 					<div className="min-w-0 space-y-6">
-						<p className="font-mono text-xs uppercase tracking-[0.35em] text-aperture-yellow sm:tracking-[0.6em]">
-							Terminal // Experience
-						</p>
 						<div className="space-y-3">
 							<p className="text-xs font-mono uppercase tracking-[0.2em] text-aperture-yellow sm:text-sm sm:tracking-[0.35em]">
 								The path i&apos;m building
@@ -96,33 +107,6 @@ export default function HeroSection({ certifications, carouselItems }: HeroSecti
 							assembling. Each experiment carries its own telemetry and
 							establishes the next waypoint.
 						</p>
-
-						<div className="rounded-2xl border border-aperture-yellow/20 bg-[#0b0b08]/80 p-5 shadow-[0_18px_40px_rgba(0,0,0,0.45)] sm:p-7">
-							<div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.4em] text-aperture-yellow">
-								<span>Active terminal</span>
-								<span>ONLINE</span>
-							</div>
-							<div className="mt-4 space-y-2 text-xs text-zinc-200">
-								<div className="flex items-center gap-3">
-									<span className="h-[1px] w-6 bg-aperture-yellow/60" />
-									<span className="font-mono tracking-[0.2em]">
-										Calibrating experience stack
-									</span>
-								</div>
-								<div className="flex items-center gap-3">
-									<span className="h-[1px] w-6 bg-aperture-yellow/60" />
-									<span className="font-mono tracking-[0.2em]">
-										Scanning narrative checkpoints
-									</span>
-								</div>
-								<div className="flex items-center gap-3">
-									<span className="h-[1px] w-6 bg-aperture-yellow/60" />
-									<span className="font-mono tracking-[0.2em]">
-										Verifying system readiness
-									</span>
-								</div>
-							</div>
-						</div>
 					</div>
 
 					<div className="min-w-0 space-y-6">

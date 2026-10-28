@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { safeRedisGet, safeRedisSet } from '../../../lib/redis';
 
-import { fetchCasesOfStudy, fetchHomeServices } from './home.service';
+import { fetchCasesOfStudy, fetchHomeServices, fetchHomeAbout } from './home.service';
 
 vi.mock('../../../lib/redis', () => ({
   safeRedisGet: vi.fn(),
@@ -13,9 +13,10 @@ vi.mock('../../../lib/redis', () => ({
 vi.mock('@supabase/supabase-js', () => {
   const mockSelect = vi.fn().mockReturnThis();
   const mockOrder = vi.fn().mockReturnThis();
+  const mockLimit = vi.fn().mockReturnThis();
 
   const createMockQuery = (table: string) => {
-    let mockData: Array<Record<string, unknown>> = [];
+    let mockData: unknown = [];
     if (table === 'home_services') {
       mockData = [{
         id: 'svc-1',
@@ -32,7 +33,18 @@ vi.mock('@supabase/supabase-js', () => {
         tags: ['React', 'D3.js'],
         order_index: 1
       }];
+    } else if (table === 'home_about') {
+      mockData = {
+        id: 1,
+        image_url: 'https://example.com/about.jpg',
+        bio: 'Bio test',
+      };
     }
+
+    const maybeSingle = vi.fn().mockResolvedValue({
+      data: mockData,
+      error: null,
+    });
 
     const query = Promise.resolve({
       data: mockData,
@@ -42,6 +54,8 @@ vi.mock('@supabase/supabase-js', () => {
     return Object.assign(query, {
       select: mockSelect,
       order: mockOrder,
+      limit: mockLimit,
+      maybeSingle,
     });
   };
 
@@ -108,6 +122,32 @@ describe('Home Service', () => {
       );
       expect(result.length).toBe(1);
       expect(result[0].id).toBe('case-1');
+    });
+  });
+
+  describe('fetchHomeAbout', () => {
+    it('should return cached about data if available', async () => {
+      const cachedData = { id: 1, image_url: 'https://example.com/cached.jpg' };
+      vi.mocked(safeRedisGet).mockResolvedValueOnce(JSON.stringify(cachedData));
+
+      const result = await fetchHomeAbout();
+
+      expect(safeRedisGet).toHaveBeenCalledWith('home_about');
+      expect(result).toEqual(cachedData);
+    });
+
+    it('should fetch about from Supabase if cache misses', async () => {
+      vi.mocked(safeRedisGet).mockResolvedValueOnce(null);
+
+      const result = await fetchHomeAbout();
+
+      expect(safeRedisGet).toHaveBeenCalledWith('home_about');
+      expect(safeRedisSet).toHaveBeenCalledWith(
+        'home_about',
+        3600,
+        expect.any(String)
+      );
+      expect(result.image_url).toBe('https://example.com/about.jpg');
     });
   });
 });

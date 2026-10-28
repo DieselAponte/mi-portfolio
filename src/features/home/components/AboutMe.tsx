@@ -1,8 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 
-export const AboutMe = () => {
+interface AboutMeProps {
+  imageUrl?: string | null;
+}
+
+export const AboutMe = ({ imageUrl }: AboutMeProps) => {
   return (
     <div className="mx-auto w-full max-w-6xl">
       <motion.div
@@ -14,9 +19,25 @@ export const AboutMe = () => {
       >
         <div className="relative">
           <div className="glass-panel relative h-[320px] w-full overflow-hidden rounded-2xl">
-            <div className="absolute inset-4 rounded-2xl border border-aperture-gray/70" />
-            <div className="absolute -left-10 top-10 h-24 w-24 rounded-full bg-aperture-blue/20 blur-2xl" />
-            <div className="absolute bottom-8 right-8 h-28 w-28 rounded-full bg-aperture-orange/20 blur-3xl" />
+            {imageUrl ? (
+              <div className="relative h-full w-full">
+                <Image
+                  src={imageUrl}
+                  alt="Diesel Aponte"
+                  fill
+                  className="object-cover transition-transform duration-500 hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, 450px"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="pointer-events-none absolute inset-3 rounded-xl border border-aperture-blue/30" />
+              </div>
+            ) : (
+              <>
+                <div className="absolute inset-4 rounded-2xl border border-aperture-gray/70" />
+                <div className="absolute -left-10 top-10 h-24 w-24 rounded-full bg-aperture-blue/20 blur-2xl" />
+                <div className="absolute bottom-8 right-8 h-28 w-28 rounded-full bg-aperture-orange/20 blur-3xl" />
+              </>
+            )}
           </div>
           <p className="mt-4 font-mono text-xs uppercase tracking-[0.4em] text-aperture-blue">
             (About me)
