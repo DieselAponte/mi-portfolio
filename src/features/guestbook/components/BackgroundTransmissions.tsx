@@ -63,12 +63,12 @@ const TypewriterLine = ({
   }, [currentText, isDeleting, phraseIndex, phrases, speed, pauseMs]);
 
   return (
-    <div className="inline-flex items-center gap-3 whitespace-nowrap font-mono text-sm sm:text-base tracking-[0.2em] text-amber-500 select-none">
-      <span className="text-amber-400 font-bold">{prefix}</span>
-      <span className="text-amber-300 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]">
+    <div className="inline-flex items-center gap-3 whitespace-nowrap font-mono text-sm sm:text-base md:text-lg tracking-[0.2em] text-amber-500 select-none">
+      <span className="text-amber-400 font-bold drop-shadow-[0_0_6px_rgba(245,158,11,0.5)]">{prefix}</span>
+      <span className="text-amber-300 drop-shadow-[0_0_10px_rgba(245,158,11,0.8)] font-medium">
         &quot;{currentText}&quot;
       </span>
-      <span className="inline-block animate-pulse font-mono text-amber-400">
+      <span className="inline-block animate-pulse font-mono text-amber-400 font-bold">
         █
       </span>
     </div>
