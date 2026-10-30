@@ -1,24 +1,30 @@
+import { ApertureAsciiLogo } from "../ApertureAsciiLogo";
+
 export const HeaderTitle = () => {
-	return (
-		<header className="space-y-6">
-			<p className="font-mono text-xs uppercase tracking-[0.5em] text-aperture-blue">
-				Division // Guestbook
-			</p>
-			<div className="space-y-4">
-				<h1
-					className="text-4xl font-black text-aperture-yellow sm:text-5xl lg:text-6xl"
-					style={{ fontFamily: "DIN, Helvetica, Arial, sans-serif" }}
-				>
-					Leave a message
-				</h1>
-				<h2 className="max-w-3xl text-2xl font-semibold text-white sm:text-3xl">
-					If any of this resonates with you, leave a note
-				</h2>
-				<p className="max-w-3xl text-base leading-7 text-zinc-300">
-					We track every transmission as part of the ongoing compliance log.
-					Your feedback helps calibrate future iterations.
-				</p>
-			</div>
-		</header>
-	);
+  return (
+    <header className="grid items-start gap-8 lg:grid-cols-[1fr_auto]">
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.4em] text-amber-500/80">
+          <span>&gt;&gt;</span>
+          <span>TERMINAL // GUESTBOOK TRANSMISSION</span>
+        </div>
+
+        <h1
+          className="text-4xl font-black tracking-tight text-amber-400 sm:text-5xl md:text-6xl lg:text-7xl"
+          style={{ fontFamily: "DIN, Helvetica, Arial, sans-serif" }}
+        >
+          Deja un mensaje
+        </h1>
+
+        <p className="max-w-2xl text-base font-semibold leading-relaxed text-amber-500 sm:text-lg md:text-xl">
+          Si algo de todo esto te hace algo de sentido o si simplemente te
+          parecio interesante, dejame conocer lo que piensas.
+        </p>
+      </div>
+
+      <div className="flex justify-center lg:justify-end">
+        <ApertureAsciiLogo />
+      </div>
+    </header>
+  );
 };

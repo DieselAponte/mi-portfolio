@@ -78,6 +78,37 @@ body {
   animation: neonLinePulse 12s ease-in-out infinite;
 }
 
+/* Transmisiones de Fondo CRT / Terminal ASCII */
+@keyframes streamScrollLeft {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes streamScrollRight {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-stream-left {
+  animation: streamScrollLeft 45s linear infinite;
+}
+
+.animate-stream-left-slow {
+  animation: streamScrollLeft 60s linear infinite;
+}
+
+.animate-stream-right {
+  animation: streamScrollRight 50s linear infinite;
+}
+
 /* Efecto de Scanline Cinematográfico */
 body::before {
   content: " ";
