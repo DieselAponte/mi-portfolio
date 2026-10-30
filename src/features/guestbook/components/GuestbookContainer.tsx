@@ -9,7 +9,6 @@ import { AuthGuard } from "./AuthGuard";
 import { BodyNotes } from "./BodyNotes";
 import { HeaderTitle } from "./HeaderTitle";
 import { PopupCreateNote } from "./PopupCreateNote";
-import { BackgroundTransmissions } from "./BackgroundTransmissions";
 import { DashedFrame } from "./DashedFrame";
 
 export default function GuestbookContainer() {
@@ -35,9 +34,6 @@ export default function GuestbookContainer() {
 
   return (
     <main className="relative min-h-screen w-full overflow-hidden bg-[#040405] text-white">
-      {/* Background Animated Transmissions Stream */}
-      <BackgroundTransmissions />
-
       {/* Subtle CRT Terminal Ambient Glow */}
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.06),transparent_65%)]" />
 

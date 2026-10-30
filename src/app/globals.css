@@ -109,6 +109,14 @@ body {
   animation: streamScrollRight 50s linear infinite;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .animate-stream-left,
+  .animate-stream-left-slow,
+  .animate-stream-right {
+    animation: none !important;
+  }
+}
+
 /* Efecto de Scanline Cinematográfico */
 body::before {
   content: " ";
