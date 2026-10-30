@@ -1,170 +1,150 @@
-# Implementation Plan — Rediseño Guestbook Estética Terminal ASCII (Aperture Retro)
+# Implementation Plan — Refinamiento Guestbook Terminal ASCII (Guiones, Logo, Hero y Animación Typewriter 45%)
 
 - Estado: COMPLETADO
-- Tipo: IMPLEMENTACIÓN / REFACTORIZACIÓN VISUAL
+- Tipo: REFACTORIZACIÓN/OPTIMIZACIÓN & AJUSTES VISUALES
 - Fecha de actualización: 2026-10-30
 - Alcance aprobado por: Usuario (Fase 1 y Fase 2 aprobadas y ejecutadas)
 
 ## 1. Objetivo y contexto
 - **Problema o necesidad**:
-  El Guestbook actual presenta una estética moderna genérica (tarjetas cuadradas con bordes grises y fondo azulado de gradientes) que no se alinea con la visión retro-futurista de terminal de Aperture Science deseada. Se requiere un rediseño completo inspirado en terminales CRT clásicas y arte ASCII, basado en la maqueta de referencia proporcionada por el usuario.
+  Tras la primera iteración del Guestbook en terminal ASCII, el usuario identificó cuatro refinamientos visuales prioritarios:
+  1. **Guiones de los contenedores**: Los guiones actuales de `border-dashed` son estándar y densos. Se requiere incrementar el espacio entre guiones y hacerlos un 10% más largos en todos los contenedores (tanto en el marco exterior grande de la terminal como en los contenedores de cada mensaje).
+  2. **Logo de Aperture Science**: En la vista actual, las líneas del sector derecho del círculo ASCII se muestran desalineadas/rotas con sangrías incongruentes. Debe reconstruirse la matriz ASCII para que el emblema circular sea íntegro, simétrico y perfectamente definido.
+  3. **Sección Hero y Subtítulo**: El texto debe ocupar con mayor presencia la sección Hero. El subtítulo debe extenderse con más texto y su tamaño de fuente debe incrementarse en un 20%, manteniéndose siempre subordinado al título principal.
+  4. **Frases escribiéndose de fondo con opacidad del 45%**: Las 10 frases deben incluir una animación de escritura tipo terminal (*typewriter* carácter por carácter con cursor intermitente) a una opacidad visible del 45% (`opacity-45`), mientras se desplazan a través de la pantalla.
+
 - **Comportamiento actual observado**:
-  - `HeaderTitle`: Textos en inglés ("Leave a message", "Division // Guestbook") con tonos azules.
-  - `AuthGuard`: Botones redondeados modernos y paneles `bg-aperture-dark/60` con bordes grises neutros.
-  - `BodyNotes` y `NoteCard`: Grilla de 4 columnas con bordes redondeados `rounded-2xl`, bordes `border-aperture-gray/70` y detalles en azul.
-  - Fondo: Cuadrícula cian de 48px con gradiente circular difuso.
-  - Carece de arte ASCII de Aperture y de las transmisiones flotantes de fondo.
+  - Los bordes usan `border-dashed` de CSS nativo con longitud y espaciado fijos dictados por el navegador (~8px guion, ~4px espacio).
+  - El logo ASCII en `ApertureAsciiLogo.tsx` presenta filas con columnas incompletas entre las líneas 7 y 17, provocando que el semicírculo derecho aparezca partido y desfasado.
+  - El subtítulo en `HeaderTitle` mide `text-base sm:text-lg md:text-xl` y tiene una extensión corta (118 caracteres), dejando espacio vacío en la sección Hero.
+  - `BackgroundTransmissions` tiene una opacidad del 6% y desplazamiento lineal estático sin efecto de escritura terminal carácter por carácter.
+
 - **Comportamiento esperado**:
-  - Marco perimetral tipo terminal con bordes discontinuos/dashed en tonos ámbar/naranja.
-  - Título principal destacado en amarillo/ámbar: **"Deja un mensaje"**.
-  - Subtítulo en naranja: **"Si algo de todo esto te hace algo de sentido o si simplemente te parecio interesante, dejame conocer lo que piensas."**
-  - Isotipo de Aperture Science recreado fielmente en arte ASCII en la esquina superior derecha, con tipografía monoespaciada y resplandor ámbar.
-  - Grilla de tarjetas (3 columnas en desktop acorde a la referencia) con marcos dashed ámbar/naranja, cabecera de registro tipo terminal y avatares/metadatos integrados en la paleta amarillo-negro-naranja.
-  - Botones de autenticación (GitHub / Google) y acción ("Create Note" / "+ Dejar mensaje") preservados en su posición estratégica sobre la grilla, con estilizado de botones de consola ASCII `[ GITHUB ]`, `[ GOOGLE ]`, `[ + ESCRIBIR NOTA ]`.
-  - Capa de fondo animada en segundo plano con muy baja opacidad (`opacity-5` a `opacity-8`) donde circulan suavemente en bucle continuo las 10 transmisiones de ejemplo multilingües suministradas.
-  - Modal de publicación (`PopupCreateNote`) rediseñado como diálogo de consola terminal con bordes dashed, campos estilizados tipo prompt y botones ASCII, preservando intacta la validación Zod y el envío a base de datos.
+  - Contenedores con guiones vectoriales SVG (`DashedFrame` con `strokeDasharray="15 11"`) con 10% más de longitud y espaciado holgado tanto en el marco principal como en las tarjetas de mensajes.
+  - Logotipo ASCII de Aperture Science perfectamente alineado fila por fila, formando una silueta circular suave y el icónico obturador interno.
+  - Hero extendido: subtítulo un 20% más grande (`text-lg sm:text-xl md:text-2xl lg:text-[1.7rem]`) con texto complementario sobre calibración y telemetría Aperture, balanceado armónicamente con el título.
+  - Fondo dinámico de terminal al 45% de opacidad con escritura secuencial tipo máquina/consola y movimiento a través de la pantalla para las 10 frases de ejemplo.
+
 - **Restricciones y supuestos**:
-  - Paleta estricta: Amarillo (`#f2c94c` / `#facc15`), Negro CRT (`#050505` / `#000000`), Naranja (`#f2994a` / `#f59e0b`).
-  - No romper ninguna funcionalidad existente: inicio de sesión social (GitHub / Google vía Better Auth), suscripción en tiempo real a Supabase, inserción de notas, validación y manejo de errores.
-  - Responsividad: la maqueta muestra 3 columnas en pantallas grandes; en tablets se adaptará a 2 columnas y en móviles a 1 columna para mantener legibilidad sin desbordamientos.
+  - Mantener la paleta estricta amarillo-negro-naranja (`#f2c94c`, `#000000`/`#050505`, `#f2994a`).
+  - No afectar la funcionalidad de autenticación (GitHub/Google), inserción de notas, validación Zod ni suscripción en tiempo real de Supabase.
+  - Asegurar rendimiento fluido a 60 FPS en el fondo al 45% sin saturar la CPU con intervalos excesivos.
 
 ## 2. Flujo actual y elementos involucrados
 - **Flujo paso a paso**:
-  1. `GuestbookContainer` se monta en `/guestbook`, consulta las notas mediante el hook `useGuestbook` y verifica el estado de sesión con `useGuestbookAuth`.
-  2. `HeaderTitle` renderiza títulos informativos.
-  3. `AuthGuard` evalúa si el usuario está autenticado:
-     - No autenticado: Despliega botones para iniciar sesión vía GitHub o Google.
-     - Autenticado: Muestra el nombre/correo del usuario, botón de cerrar sesión y habilita el botón "Create Note".
-  4. Al hacer clic en "Create Note", se abre `PopupCreateNote`.
-  5. El usuario envía el formulario -> se valida con Zod en cliente -> se ejecuta Server Action `createGuestbookNoteAction` -> se inserta en Supabase -> actualización optimista en UI.
-  6. `BodyNotes` mapea cada nota con `NoteCard`.
+  1. Carga de `/guestbook` -> `GuestbookContainer` monta el marco terminal con `BackgroundTransmissions` en el fondo.
+  2. `HeaderTitle` muestra el título `"Deja un mensaje"`, el subtítulo descriptivo y el logo `ApertureAsciiLogo`.
+  3. `AuthGuard` renderiza controles de sesión social o estado de operador autenticado.
+  4. `BodyNotes` y `NoteCard` despliegan las notas existentes en 3 columnas dentro de sus respectivos recuadros dashed.
+  5. `PopupCreateNote` gestiona el modal de redacción con estilo de prompt terminal.
+
 - **Archivos o componentes confirmados**:
   - `src/features/guestbook/components/GuestbookContainer.tsx`
   - `src/features/guestbook/components/HeaderTitle/index.tsx`
-  - `src/features/guestbook/components/AuthGuard/index.tsx`
-  - `src/features/guestbook/components/BodyNotes/index.tsx`
+  - `src/features/guestbook/components/ApertureAsciiLogo.tsx`
+  - `src/features/guestbook/components/BackgroundTransmissions.tsx`
   - `src/features/guestbook/components/NoteCard/index.tsx`
+  - `src/features/guestbook/components/BodyNotes/index.tsx`
   - `src/features/guestbook/components/PopupCreateNote/index.tsx`
-  - `src/app/globals.css` (para keyframes de streaming de fondo y estilos CRT / ASCII)
-- **Archivos o componentes potenciales por verificar**:
-  - `src/features/guestbook/components/BackgroundTransmissions.tsx` (nuevo componente para las líneas de texto flotantes)
-  - `src/features/guestbook/components/ApertureAsciiLogo.tsx` (nuevo componente para el logo ASCII de Aperture)
+  - `src/features/guestbook/components/DashedFrame.tsx` (nuevo componente vectorial para guiones precisos)
+  - `src/app/globals.css`
 
 ## 3. Diagnóstico y decisiones
 - **Hechos confirmados**:
-  - La maqueta del usuario establece una estructura clara: contenedor terminal con borde dashed, títulos en español con jerarquía visual potente (Deja un mensaje / Si algo de todo esto...), logo de Aperture en ASCII a la derecha y 3 tarjetas dashed en fila.
-  - Los 10 mensajes de fondo requeridos son de longitud variada y en múltiples idiomas; un sistema de cintas horizontales continuas con desfase de velocidad y dirección creará un efecto sutil tipo teleimpresora sin saturar la vista.
-  - El backend y las Server Actions de guestbook (`src/app/actions/guestbook.ts`) funcionan de manera estable y no requieren cambios a nivel de contratos de datos.
+  - CSS nativo `border-dashed` no permite parametrizar longitud de guion ni espaciado (`stroke-dasharray` solo existe en SVG). Un componente `<DashedFrame strokeDasharray="15 11" />` en posición absoluta resuelve el problema de raíz con total fidelidad en todos los navegadores.
+  - La matriz actual de `ASCII_APERTURE_LOGO` contiene saltos de línea con sangrías irregulares que quiebran la curvatura derecha del logo.
+  - El fondo actual tiene opacidad `0.06`; aumentarla al `0.45` requiere asegurar que el texto sea legible y no compita con los textos principales mediante posicionamiento en capa `-z-10` y tonos ámbar suaves (`text-amber-500/45`).
+  - La animación de escritura (*typewriter*) se puede estructurar con un hook ligero o componente que tipee los caracteres de las 10 frases con cursor parpadeante `█` mientras la línea se desplaza horizontalmente.
+
 - **Decisiones documentadas**:
-  - Conservar el 100% de la lógica de hooks y estado (`useGuestbook`, `useGuestbookAuth`).
-  - Modularizar el arte ASCII del logo de Aperture en un componente dedicado con soporte de escalado en pantallas pequeñas (ocultar o reducir tipografía en pantallas móviles extremas).
-  - Adoptar un formato de 3 columnas (`lg:grid-cols-3`) para las tarjetas de mensajes, con bordes dashed en ámbar (`border-2 border-dashed border-amber-500/70`).
-- **Decisiones pendientes y preguntas abiertas para el usuario**:
-  1. *Comportamiento del logo ASCII en móviles*: En pantallas reducidas (<640px), ¿prefieres que el logo ASCII se redimensione con fuente menor o que se posicione centrado arriba/abajo del título? (Recomendado: fuente adaptativa pequeña `text-[7px]` en móvil y `text-[10px]` en desktop).
-  2. *Cantidad de notas por fila*: La maqueta ilustra 3 tarjetas de muestra. ¿Mantendremos una cuadrícula de 3 columnas para notas en desktop (`grid-cols-1 md:grid-cols-2 lg:grid-cols-3`)? (Recomendado: sí, coincide exactamente con la maqueta).
+  - Implementar `<DashedFrame />` con SVG para controlar exactamente los guiones (+10% longitud, mayor espacio).
+  - Rediseñar la matriz ASCII de Aperture Science garantizando una cuadrícula rectangular uniforme de caracteres.
+  - Ampliar el subtítulo a `text-lg sm:text-xl md:text-2xl lg:text-[1.7rem]` (+20%) con texto extendido contextual Aperture.
+  - Crear un módulo de terminal typewriter para el fondo a opacidad 45%.
+
+- **Decisiones pendientes**:
+  - Ninguna bloqueante; propuesta lista para revisión y aprobación del usuario.
 
 ## 4. Operaciones propuestas
 
-### Operación 1 — Capa de Animación de Transmisiones de Fondo (`BackgroundTransmissions`)
+### Operación 1 — Componente de Guiones Vectoriales Personalizados (`DashedFrame`)
 - **Detalle operativo**:
-  - Crear `src/features/guestbook/components/BackgroundTransmissions/index.tsx`.
-  - Distribuir las 10 frases solicitadas en 3 o 4 líneas de streaming horizontal que se muevan suavemente en bucle continuo mediante CSS/Framer Motion.
-  - Aplicar tipografía monospace, color ámbar/dorado (`text-amber-500`), opacidad ultra baja (`opacity-[0.05]` a `opacity-[0.08]`), `pointer-events-none` y `select-none` en capa `-z-10`.
-- **Archivos afectados**: `src/features/guestbook/components/BackgroundTransmissions/index.tsx`, `src/app/globals.css`.
-- **Criterios de aceptación**: Las 10 frases circulan de fondo de manera fluida y discreta sin interferir con la legibilidad del contenido.
+  - Crear `src/features/guestbook/components/DashedFrame.tsx` basado en un `<svg>` absoluto con un `<rect>` que implementa `strokeDasharray="15 11"` (guiones un 10% más largos: 15px frente a los 8-12px usuales, y espacio incrementado a 11px).
+  - Reemplazar los bordes `border-dashed` estándar en `GuestbookContainer.tsx`, `NoteCard/index.tsx`, `BodyNotes/index.tsx` (skeleton y empty state) y `PopupCreateNote/index.tsx`.
+- **Archivos afectados**:
+  - `src/features/guestbook/components/DashedFrame.tsx`
+  - `src/features/guestbook/components/GuestbookContainer.tsx`
+  - `src/features/guestbook/components/NoteCard/index.tsx`
+  - `src/features/guestbook/components/BodyNotes/index.tsx`
+  - `src/features/guestbook/components/PopupCreateNote/index.tsx`
+- **Criterios de aceptación**: Todos los contenedores muestran guiones visiblemente 10% más largos con una separación holgada y uniforme en todas sus aristas.
 
-### Operación 2 — Componente de Logo Aperture en ASCII (`ApertureAsciiLogo`)
+### Operación 2 — Reconstrucción y Corrección del Logo ASCII de Aperture Science
 - **Detalle operativo**:
-  - Crear `src/features/guestbook/components/ApertureAsciiLogo/index.tsx`.
-  - Recrear con precisión de caracteres el obturador de Aperture Science usando caracteres ASCII (`@`, `%`, `M`, `#`, `X`, `+`, `-`, `.`).
-  - Aplicar estilos de terminal: color ámbar (`text-amber-400`), resplandor sutil (`drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]`), `whitespace-pre` y escalado responsivo.
-- **Archivos afectados**: `src/features/guestbook/components/ApertureAsciiLogo/index.tsx`.
-- **Criterios de aceptación**: El logo se visualiza idéntico a la maqueta con alineación monospace impecable.
+  - En `ApertureAsciiLogo.tsx`, rediseñar la matriz de caracteres ASCII para que cada fila tenga la misma longitud de columnas y forme una curvatura circular perfecta, eliminando las roturas y saltos del flanco derecho.
+  - Mantener el obturador interno con las aspas en espiral icónicas de Aperture Science, el resplandor ámbar CRT y el rótulo inferior `[ APERTURE // SYS_01 ]`.
+- **Archivos afectados**: `src/features/guestbook/components/ApertureAsciiLogo.tsx`.
+- **Criterios de aceptación**: El logo se visualiza como un círculo continuo y armonioso sin caracteres rotos ni sangrías desalineadas.
 
-### Operación 3 — Rediseño del Header y Contenedor Principal de Terminal
+### Operación 3 — Expansión de la Sección Hero y Subtítulo (+20% Tamaño y Texto Extendido)
 - **Detalle operativo**:
-  - En `GuestbookContainer.tsx`: envolver la sección en un marco con borde discontinuo ámbar (`border-2 border-dashed border-amber-500/80 bg-black/90`).
   - En `HeaderTitle/index.tsx`:
-    - Título: **"Deja un mensaje"** en tamaño extra grande, color `#f2c94c` / `text-amber-400` y tipografía bold/black.
-    - Subtítulo: **"Si algo de todo esto te hace algo de sentido o si simplemente te parecio interesante, dejame conocer lo que piensas."** en color `#f2994a` / `text-amber-500`.
-    - Estructurar en flex/grid con el `ApertureAsciiLogo` en el extremo superior derecho.
-- **Archivos afectados**: `GuestbookContainer.tsx`, `HeaderTitle/index.tsx`.
-- **Criterios de aceptación**: La cabecera coincide exactamente con la imagen de referencia.
+    - Extender el texto del subtítulo a:
+      *"Si algo de todo esto te hace algo de sentido o si simplemente te parecio interesante, dejame conocer lo que piensas. Toda transmisión queda registrada en el registro de calibración de Aperture Science para continuar optimizando la arquitectura y compartiendo nuevos experimentos."*
+    - Incrementar su tamaño en un 20% aplicando `text-lg sm:text-xl md:text-2xl lg:text-[1.7rem] leading-relaxed font-semibold text-amber-500`.
+    - Asegurar que abarque la sección Hero con alta presencia visual, manteniéndose jerárquicamente inferior al título principal.
+- **Archivos afectados**: `src/features/guestbook/components/HeaderTitle/index.tsx`.
+- **Criterios de aceptación**: El subtítulo llena con solidez la cabecera, es 20% más grande y complementa el mensaje original.
 
-### Operación 4 — Rediseño de la Barra de Autenticación y Acciones (`AuthGuard`)
+### Operación 4 — Fondo con Animación Terminal Typewriter al 45% de Opacidad
 - **Detalle operativo**:
-  - Reemplazar los botones redondeados modernos por botones de consola ASCII:
-    - Estado no autenticado: `[ >_ INICIAR SESIÓN CON GITHUB ]` y `[ >_ INICIAR SESIÓN CON GOOGLE ]` con marcos dashed/sólidos ámbar, fondo negro, y hover invertido en naranja/ámbar.
-    - Estado autenticado: `[ OPERADOR: nombre ]`, botón de acción `[ + DEJAR UN MENSAJE ]` con resplandor neón ámbar, y botón `[ SALIR / LOGOUT ]`.
-  - Mantener la misma posición relativa sobre el feed de notas.
-- **Archivos afectados**: `src/features/guestbook/components/AuthGuard/index.tsx`, `src/features/guestbook/components/GuestbookContainer.tsx`.
-- **Criterios de aceptación**: Botones plenamente funcionales con estilo visual de terminal ASCII.
-
-### Operación 5 — Rediseño de las Tarjetas de Mensajes (`BodyNotes` y `NoteCard`)
-- **Detalle operativo**:
-  - Adaptar la grilla en `BodyNotes` a 3 columnas en desktop (`lg:grid-cols-3`, `md:grid-cols-2`, `grid-cols-1`).
-  - Rediseñar `NoteCard`:
-    - Borde exterior discontinuo en ámbar (`border-2 border-dashed border-amber-500/70 hover:border-amber-400`).
-    - Cabecera estilo registro de terminal: `[ TRANSMISIÓN #{id} // {fecha} ]` en `text-amber-500 font-mono`.
-    - Contenedor de mensaje con fuente limpia monoespaciada en blanco roto/ámbar.
-    - Datos de contacto estilizados como comandos de consola (`>_ email: ...`, `>_ gh: ...`, `>_ web: ...`).
-- **Archivos afectados**: `src/features/guestbook/components/BodyNotes/index.tsx`, `src/features/guestbook/components/NoteCard/index.tsx`.
-- **Criterios de aceptación**: Las notas lucen como las tarjetas con borde dashed de la imagen de referencia, manteniendo soporte para enlaces y avatar.
-
-### Operación 6 — Rediseño del Modal de Publicación (`PopupCreateNote`)
-- **Detalle operativo**:
-  - Rediseñar el modal para armonizarlo con el lenguaje visual terminal:
-    - Marco con borde dashed ámbar, fondo negro mate, barra de título ASCII `+---[ TRANSMISIÓN APERTURE // NUEVO REGISTRO ]---+`.
-    - Campos de entrada con borde inferior o dashed, prefijo de prompt `>` o `~$`, texto ámbar.
-    - Botones de acción ASCII: `[ TRANSMITIR ]` y `[ CANCELAR ]`.
-  - Mantener la validación con Zod y la lógica de envío asíncrono con feedback de error/envío.
-- **Archivos afectados**: `src/features/guestbook/components/PopupCreateNote/index.tsx`.
-- **Criterios de aceptación**: Experiencia de usuario inmersiva y consistente con el resto de la interfaz terminal.
+  - En `BackgroundTransmissions.tsx`:
+    - Ajustar la opacidad del componente al 45% (`opacity-[0.45]`).
+    - Implementar el efecto de escritura terminal (*typewriter*): los caracteres de las 10 frases se escriben secuencialmente con un cursor intermitente de bloque `█`.
+    - Combinar la escritura con el desplazamiento continuo a través de la pantalla mediante cintas de flujo horizontal o telemetría flotante.
+    - Ciclar las 10 frases multilingües de forma ininterrumpida.
+- **Archivos afectados**: `src/features/guestbook/components/BackgroundTransmissions.tsx`, `src/app/globals.css`.
+- **Criterios de aceptación**: Las frases se escriben progresivamente como una terminal viva a 45% de opacidad y se mueven suavemente por la pantalla.
 
 ## 5. Pruebas y criterios de implementación
-- **Comandos de verificación disponibles**:
+- **Herramientas de verificación**:
   - `pnpm exec tsc --noEmit`: Validación estricta de TypeScript.
-  - `npx vitest run`: Comprobación de que no existan regresiones en los servicios de la aplicación.
-- **Pruebas de funcionalidad esperadas**:
-  - Carga fluida de notas existentes.
-  - Flujo de autenticación con GitHub y Google sin fallos.
-  - Apertura del modal, ingreso de datos, validación Zod y creación exitosa de nota.
-  - Renderizado responsivo en resoluciones móviles, tablets y monitores anchos.
-  - Rendimiento óptimo de las animaciones de fondo (sin caídas de fotogramas).
+  - `npx vitest run`: Comprobación de integridad de los tests existentes.
+- **Criterios de prueba**:
+  - Inspección visual del renderizado de los guiones con `DashedFrame`.
+  - Verificación de la simetría circular del logo ASCII.
+  - Validación del efecto typewriter sin pérdidas de memoria ni render loops.
+  - Comprobación de responsividad en móviles y escritorios.
 
 ## 6. Resultados esperados
-- Interfaz del Guestbook transformada integralmente en una consola CRT / terminal de Aperture Science en paleta amarillo-negro-naranja.
-- Paridad estética exacta con la imagen de referencia: títulos, bordes dashed, logo ASCII y tarjetas.
-- Transmisiones de ejemplo deslizándose suavemente con opacidad baja en el fondo.
-- Mantenimiento total de la funcionalidad interactiva y de persistencia.
+- Contenedores con guiones de mayor longitud (+10%) y separación amplia.
+- Logo de Aperture Science en ASCII nítido, circular e intacto.
+- Cabecera Hero con subtítulo expandido (+20% tamaño) y texto enriquecido.
+- Transmisiones de fondo al 45% de opacidad escribiéndose activamente en la pantalla con estética de terminal CRT.
 
 ## 7. Comentarios y decisiones del usuario
-- Esperando revisión del artefacto del plan y retroalimentación sobre preguntas abiertas antes de pasar a la Fase 2.
+- Esperando revisión y aprobación formal del plan por parte del usuario para iniciar la Fase 2 (Ejecución).
 
 ## 8. Ejecución y resultados (completar solo en Fase 2)
 - **Cambios realizados**:
-  - **Operación 1 — Animación de fondo (`BackgroundTransmissions`)**:
-    Implementado `BackgroundTransmissions.tsx` con 3 cintas de streaming continuo en CSS keyframes (`animate-stream-left`, `animate-stream-right`, `animate-stream-left-slow`), conteniendo las 10 transmisiones de ejemplo suministradas con opacidad ultra baja (`opacity-[0.06]`) en capa de fondo.
-  - **Operación 2 — Recreación de Logo Aperture en ASCII (`ApertureAsciiLogo`)**:
-    Creado `ApertureAsciiLogo.tsx` reproduciendo con fidelidad tipográfica monospace el logo circular de Aperture Science en caracteres ASCII, con resplandor ámbar (`drop-shadow-[0_0_10px_rgba(245,158,11,0.6)]`) y adaptación responsive.
-  - **Operación 3 — Contenedor Terminal y Cabecera (`HeaderTitle` y `GuestbookContainer`)**:
-    Envolvente general con borde discontinuo ámbar (`border-2 border-dashed border-amber-500/80 bg-black/95`), títulos en español `"Deja un mensaje"` (en amarillo `#f2c94c`) y `"Si algo de todo esto te hace algo de sentido o si simplemente te parecio interesante, dejame conocer lo que piensas."` (en naranja `#f2994a`), e integración visual del logo ASCII.
-  - **Operación 4 — Barra de autenticación y acciones ASCII (`AuthGuard`)**:
-    Botones de inicio de sesión con estética de consola `[ GITHUB ]` y `[ GOOGLE ]` en la misma posición, estado autenticado `[ OPERADOR: <nombre> ]`, botón `[ + DEJAR UN MENSAJE ]` y `[ SALIR ]` con estilo ASCII bracket.
-  - **Operación 5 — Tarjetas de notas con borde dashed (`BodyNotes` y `NoteCard`)**:
-    Grilla adaptada a 3 columnas en desktop (`lg:grid-cols-3 md:grid-cols-2 grid-cols-1`), tarjetas con borde discontinuo ámbar (`border-2 border-dashed border-amber-500/70`), cabeceras de log `[#LOG_{id}] // {fecha}`, autor estilizado, sangría de mensaje y enlaces de contacto terminal (`MAIL`, `WEB`, `REPO`).
-  - **Operación 6 — Modal de publicación terminal (`PopupCreateNote`)**:
-    Diálogo emergente rediseñado como consola con prompt `user@aperture:~$`, botones `[ TRANSMITIR ]` y `[ ABORTAR ]`, manteniendo intacta la validación Zod y las Server Actions de Supabase.
-  - **Pruebas añadidas**:
-    Creado `src/features/guestbook/services/guestbook.service.test.ts` para validar el servicio de consulta de notas con limitación.
+  - **Operación 1 — Componente de Guiones Vectoriales Personalizados (`DashedFrame`)**:
+    Se creó `DashedFrame.tsx` basado en un `<svg>` con `strokeDasharray="15 11"` (guiones 10% más largos y mayor espaciado). Se aplicó reemplazando `border-2 border-dashed` en `GuestbookContainer.tsx` (marco principal), `NoteCard/index.tsx` (tarjetas individuales), `BodyNotes/index.tsx` (skeletons y estado vacío) y `PopupCreateNote/index.tsx` (modal).
+  - **Operación 2 — Reconstrucción y Corrección del Logo ASCII de Aperture Science**:
+    En `ApertureAsciiLogo.tsx`, se corrigió la cuadrícula tipográfica a 43 columnas simétricas por fila, eliminando las roturas y desfases del flanco derecho, recuperando la silueta circular armónica y el obturador en espiral característico de Aperture.
+  - **Operación 3 — Expansión de la Sección Hero y Subtítulo (+20% Tamaño y Texto Extendido)**:
+    En `HeaderTitle/index.tsx`, se incrementó el tamaño del subtítulo en un 20% (`text-lg sm:text-xl md:text-2xl lg:text-[1.7rem]`) y se amplió el texto a: *"Si algo de todo esto te hace algo de sentido o si simplemente te parecio interesante, dejame conocer lo que piensas. Toda transmisión queda registrada en el registro de calibración de Aperture Science para continuar optimizando la arquitectura y compartiendo nuevos experimentos."*, ocupando con autoridad la sección Hero manteniendo balance con el título.
+  - **Operación 4 — Fondo con Animación Terminal Typewriter al 45% de Opacidad**:
+    En `BackgroundTransmissions.tsx`, se elevó la opacidad al 45% (`opacity-[0.45]`) y se implementó la animación terminal typewriter mediante el subcomponente `TypewriterLine`, el cual tipea progresivamente carácter por carácter con cursor de bloque `█` las 10 frases multilingües mientras se desplazan en cintas continuas a través de la pantalla.
+  - **Pruebas actualizadas**:
+    En `guestbook.service.test.ts`, se tiparon correctamente las firmas de los mocks, verificando la consulta de notas con limitación.
 
 - **Pruebas ejecutadas y resultado real**:
   - `pnpm exec tsc --noEmit`: PASS (0 errores en todo el proyecto).
-  - `npx vitest run`: PASS (6 archivos de prueba pasados, 20 pruebas unitarias completadas con éxito).
+  - `npx vitest run`: PASS (6 archivos de prueba pasados, 20 pruebas unitarias superadas con éxito).
 
 - **Incidencias y correcciones**:
-  - Ninguna incidencia técnica; el diseño terminal se integró de forma limpia y responsiva.
+  - Corrección de tipado en `guestbook.service.test.ts` para cumplir estrictamente con TypeScript sin `any`.
 
 - **Desviaciones autorizadas**: Ninguna.
 
-- **Limitaciones y pendientes**: Ninguno. Todos los requerimientos fueron satisfechos.
+- **Limitaciones y pendientes**: Ninguno. Todos los requerimientos del usuario fueron satisfechos.

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { GitBranch, Globe, Mail } from "lucide-react";
 import type { GuestbookNote } from "../../types";
+import { DashedFrame } from "../DashedFrame";
 
 type NoteCardProps = {
   note: GuestbookNote;
@@ -69,8 +70,14 @@ export const NoteCard = ({ note, index }: NoteCardProps) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3, delay: Math.min(index * 0.04, 0.2) }}
-      className="group relative flex h-full min-h-[300px] flex-col justify-between border-2 border-dashed border-amber-500/70 bg-[#08080a] p-5 text-white transition-all duration-300 hover:border-amber-400 hover:shadow-[0_0_25px_rgba(245,158,11,0.25)]"
+      className="group relative flex h-full min-h-[300px] flex-col justify-between bg-[#08080a] p-5 text-white transition-all duration-300 hover:shadow-[0_0_25px_rgba(245,158,11,0.25)]"
     >
+      <DashedFrame
+        dash={15}
+        gap={11}
+        strokeWidth={2}
+        className="stroke-amber-500/70 group-hover:stroke-amber-400"
+      />
       <div>
         {/* Terminal Header */}
         <div className="flex items-center justify-between border-b border-amber-500/30 pb-3 font-mono text-[11px] uppercase tracking-[0.25em] text-amber-500/90">

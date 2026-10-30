@@ -5,6 +5,7 @@ import { X, Send, Terminal } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { z } from "zod";
 import type { GuestbookNoteInsert } from "../../types";
+import { DashedFrame } from "../DashedFrame";
 
 const formSchema = z.object({
   author: z.string().trim().min(2, "El nombre debe tener al menos 2 caracteres"),
@@ -155,8 +156,10 @@ export const PopupCreateNote = ({
             initial={{ opacity: 0, scale: 0.95, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
-            className="relative w-full max-w-xl border-2 border-dashed border-amber-500 bg-[#0a0a0c] p-6 shadow-[0_0_50px_rgba(245,158,11,0.25)] sm:p-8"
+            className="relative w-full max-w-xl bg-[#0a0a0c] p-6 shadow-[0_0_50px_rgba(245,158,11,0.25)] sm:p-8"
           >
+            <DashedFrame dash={15} gap={11} strokeWidth={2} className="stroke-amber-500" />
+
             {/* Header bar */}
             <div className="flex items-center justify-between border-b border-amber-500/40 pb-4">
               <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.25em] text-amber-400">

@@ -1,4 +1,4 @@
-"use client";
+/*  */"use client";
 
 import { useMemo, useState } from "react";
 import { Footer } from "../../home/components/Footer";
@@ -10,6 +10,7 @@ import { BodyNotes } from "./BodyNotes";
 import { HeaderTitle } from "./HeaderTitle";
 import { PopupCreateNote } from "./PopupCreateNote";
 import { BackgroundTransmissions } from "./BackgroundTransmissions";
+import { DashedFrame } from "./DashedFrame";
 
 export default function GuestbookContainer() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -41,8 +42,10 @@ export default function GuestbookContainer() {
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.06),transparent_65%)]" />
 
       <section className="relative min-h-screen px-4 pb-20 pt-24 sm:px-6 md:px-8">
-        {/* Main Terminal Frame with Amber Dashed Border */}
-        <div className="mx-auto w-full max-w-7xl border-2 border-dashed border-amber-500/80 bg-black/95 p-6 shadow-[0_0_50px_rgba(245,158,11,0.12)] sm:p-10 md:p-12">
+        {/* Main Terminal Frame with Amber Dashed Border (10% longer dashes + increased gap) */}
+        <div className="relative mx-auto w-full max-w-7xl bg-black/95 p-6 shadow-[0_0_50px_rgba(245,158,11,0.12)] sm:p-10 md:p-12">
+          <DashedFrame dash={15} gap={11} strokeWidth={2} className="stroke-amber-500/80" />
+          
           {/* Top Title & ASCII Logo Header */}
           <HeaderTitle />
 

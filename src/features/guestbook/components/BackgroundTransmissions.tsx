@@ -1,75 +1,232 @@
 "use client";
 
-const TRANSMISSIONS_ROW_1 = [
+import { useEffect, useState } from "react";
+
+const ALL_TRANSMISSIONS = [
   "¡Me encantó tu trabajo! Deberíamos conectar.",
-  "デザインが本当に素晴らしいです！",
-  "Tengo un proyecto similar, te gustaría colaborar?",
-  "Deine Website ist etwas Besonderes.",
+  "Estoy trabajando en algo parecido, ¡me inspiraste!",
   "¡Qué genial encontrar a alguien que también disfruta experimentar!",
-];
-
-const TRANSMISSIONS_ROW_2 = [
-  "Hi! I'm also exploring creative web experiences.",
-  "Estoy trabajando en algo parecido, ¡me inspiraste!",
-  "Ciao! Il tuo portfolio è fantastico!",
   "Te comparto mi portfolio, creo que tenemos intereses similares.",
-  "Seu site tem muita personalidade.",
-];
-
-const TRANSMISSIONS_ROW_3 = [
-  "Seu site tem muita personalidade.",
-  "¡Me encantó tu trabajo! Deberíamos conectar.",
+  "Tengo un proyecto similar, te gustaría colaborar?",
   "Hi! I'm also exploring creative web experiences.",
   "デザインが本当に素晴らしいです！",
-  "Estoy trabajando en algo parecido, ¡me inspiraste!",
   "Deine Website ist etwas Besonderes.",
+  "Ciao! Il tuo portfolio è fantastico!",
+  "Seu site tem muita personalidad.",
 ];
+
+interface TypewriterLineProps {
+  phrases: string[];
+  initialIndex?: number;
+  prefix?: string;
+  speed?: number;
+  pauseMs?: number;
+}
+
+const TypewriterLine = ({
+  phrases,
+  initialIndex = 0,
+  prefix = "> TRANSMISIÓN //",
+  speed = 50,
+  pauseMs = 2200,
+}: TypewriterLineProps) => {
+  const [phraseIndex, setPhraseIndex] = useState(initialIndex);
+  const [currentText, setCurrentText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const targetPhrase = phrases[phraseIndex % phrases.length];
+    let timeoutId: NodeJS.Timeout;
+
+    if (!isDeleting) {
+      if (currentText.length < targetPhrase.length) {
+        timeoutId = setTimeout(() => {
+          setCurrentText(targetPhrase.slice(0, currentText.length + 1));
+        }, speed);
+      } else {
+        timeoutId = setTimeout(() => {
+          setIsDeleting(true);
+        }, pauseMs);
+      }
+    } else {
+      if (currentText.length > 0) {
+        timeoutId = setTimeout(() => {
+          setCurrentText(targetPhrase.slice(0, currentText.length - 1));
+        }, speed / 2);
+      } else {
+        setIsDeleting(false);
+        setPhraseIndex((prev) => (prev + 1) % phrases.length);
+      }
+    }
+
+    return () => clearTimeout(timeoutId);
+  }, [currentText, isDeleting, phraseIndex, phrases, speed, pauseMs]);
+
+  return (
+    <div className="inline-flex items-center gap-3 whitespace-nowrap font-mono text-sm sm:text-base tracking-[0.2em] text-amber-500 select-none">
+      <span className="text-amber-400 font-bold">{prefix}</span>
+      <span className="text-amber-300 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]">
+        &quot;{currentText}&quot;
+      </span>
+      <span className="inline-block animate-pulse font-mono text-amber-400">
+        █
+      </span>
+    </div>
+  );
+};
 
 export const BackgroundTransmissions = () => {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none absolute inset-0 -z-10 flex flex-col justify-around overflow-hidden select-none opacity-[0.06]"
+      className="pointer-events-none absolute inset-0 -z-10 flex flex-col justify-around overflow-hidden select-none opacity-[0.45]"
     >
-      {/* Row 1 - Left to Right */}
-      <div className="flex w-max whitespace-nowrap font-mono text-sm tracking-[0.25em] text-amber-500 animate-stream-left">
-        {[...TRANSMISSIONS_ROW_1, ...TRANSMISSIONS_ROW_1, ...TRANSMISSIONS_ROW_1].map(
-          (text, idx) => (
-            <span key={`r1-${idx}`} className="mx-8 flex items-center gap-4">
-              <span className="text-amber-400/50">&gt;&gt;</span>
-              <span>{text}</span>
-              <span className="text-amber-400/30">//</span>
-            </span>
-          )
-        )}
+      {/* Stream Lane 1 - Moving Left */}
+      <div className="flex w-max whitespace-nowrap animate-stream-left py-2">
+        <div className="flex items-center gap-16 px-8">
+          <TypewriterLine
+            phrases={ALL_TRANSMISSIONS}
+            initialIndex={0}
+            prefix="[PORTAL_COMM // 01] >"
+            speed={45}
+          />
+          <TypewriterLine
+            phrases={ALL_TRANSMISSIONS}
+            initialIndex={6}
+            prefix="[GLOBAL_TELEMETRY // 02] >"
+            speed={55}
+          />
+          <TypewriterLine
+            phrases={ALL_TRANSMISSIONS}
+            initialIndex={1}
+            prefix="[APERTURE_FEED // 03] >"
+            speed={48}
+          />
+        </div>
+        {/* Repeat for seamless infinite scrolling */}
+        <div className="flex items-center gap-16 px-8">
+          <TypewriterLine
+            phrases={ALL_TRANSMISSIONS}
+            initialIndex={0}
+            prefix="[PORTAL_COMM // 01] >"
+            speed={45}
+          />
+          <TypewriterLine
+            phrases={ALL_TRANSMISSIONS}
+            initialIndex={6}
+            prefix="[GLOBAL_TELEMETRY // 02] >"
+            speed={55}
+          />
+          <TypewriterLine
+            phrases={ALL_TRANSMISSIONS}
+            initialIndex={1}
+            prefix="[APERTURE_FEED // 03] >"
+            speed={48}
+          />
+        </div>
       </div>
 
-      {/* Row 2 - Right to Left */}
-      <div className="flex w-max whitespace-nowrap font-mono text-xs tracking-[0.3em] text-amber-400 animate-stream-right">
-        {[...TRANSMISSIONS_ROW_2, ...TRANSMISSIONS_ROW_2, ...TRANSMISSIONS_ROW_2].map(
-          (text, idx) => (
-            <span key={`r2-${idx}`} className="mx-10 flex items-center gap-4">
-              <span className="text-amber-500/50">[TX]</span>
-              <span>{text}</span>
-              <span className="text-amber-500/30">:::</span>
-            </span>
-          )
-        )}
+      {/* Stream Lane 2 - Moving Right */}
+      <div className="flex w-max whitespace-nowrap animate-stream-right py-2">
+        <div className="flex items-center gap-16 px-8">
+          <TypewriterLine
+            phrases={ALL_TRANSMISSIONS}
+            initialIndex={3}
+            prefix="[INCOMING_TX // 04] >"
+            speed={50}
+          />
+          <TypewriterLine
+            phrases={ALL_TRANSMISSIONS}
+            initialIndex={7}
+            prefix="[REMOTE_SIGNAL // 05] >"
+            speed={40}
+          />
+          <TypewriterLine
+            phrases={ALL_TRANSMISSIONS}
+            initialIndex={4}
+            prefix="[COLLAB_REQ // 06] >"
+            speed={52}
+          />
+        </div>
+        {/* Repeat for seamless infinite scrolling */}
+        <div className="flex items-center gap-16 px-8">
+          <TypewriterLine
+            phrases={ALL_TRANSMISSIONS}
+            initialIndex={3}
+            prefix="[INCOMING_TX // 04] >"
+            speed={50}
+          />
+          <TypewriterLine
+            phrases={ALL_TRANSMISSIONS}
+            initialIndex={7}
+            prefix="[REMOTE_SIGNAL // 05] >"
+            speed={40}
+          />
+          <TypewriterLine
+            phrases={ALL_TRANSMISSIONS}
+            initialIndex={4}
+            prefix="[COLLAB_REQ // 06] >"
+            speed={52}
+          />
+        </div>
       </div>
 
-      {/* Row 3 - Left to Right Slow */}
-      <div className="hidden sm:flex w-max whitespace-nowrap font-mono text-xs tracking-[0.35em] text-amber-500 animate-stream-left-slow">
-        {[...TRANSMISSIONS_ROW_3, ...TRANSMISSIONS_ROW_3, ...TRANSMISSIONS_ROW_3].map(
-          (text, idx) => (
-            <span key={`r3-${idx}`} className="mx-8 flex items-center gap-4">
-              <span className="text-amber-400/40">~&gt;</span>
-              <span>{text}</span>
-              <span className="text-amber-400/30">||</span>
-            </span>
-          )
-        )}
+      {/* Stream Lane 3 - Moving Left (Slow) */}
+      <div className="hidden sm:flex w-max whitespace-nowrap animate-stream-left-slow py-2">
+        <div className="flex items-center gap-16 px-8">
+          <TypewriterLine
+            phrases={ALL_TRANSMISSIONS}
+            initialIndex={5}
+            prefix="[GLOBAL_COMM // 07] >"
+            speed={55}
+          />
+          <TypewriterLine
+            phrases={ALL_TRANSMISSIONS}
+            initialIndex={8}
+            prefix="[TRANSMISSION // 08] >"
+            speed={48}
+          />
+          <TypewriterLine
+            phrases={ALL_TRANSMISSIONS}
+            initialIndex={9}
+            prefix="[APERTURE_NET // 09] >"
+            speed={42}
+          />
+          <TypewriterLine
+            phrases={ALL_TRANSMISSIONS}
+            initialIndex={2}
+            prefix="[INSPIRATION_PULSE // 10] >"
+            speed={46}
+          />
+        </div>
+        {/* Repeat for seamless infinite scrolling */}
+        <div className="flex items-center gap-16 px-8">
+          <TypewriterLine
+            phrases={ALL_TRANSMISSIONS}
+            initialIndex={5}
+            prefix="[GLOBAL_COMM // 07] >"
+            speed={55}
+          />
+          <TypewriterLine
+            phrases={ALL_TRANSMISSIONS}
+            initialIndex={8}
+            prefix="[TRANSMISSION // 08] >"
+            speed={48}
+          />
+          <TypewriterLine
+            phrases={ALL_TRANSMISSIONS}
+            initialIndex={9}
+            prefix="[APERTURE_NET // 09] >"
+            speed={42}
+          />
+          <TypewriterLine
+            phrases={ALL_TRANSMISSIONS}
+            initialIndex={2}
+            prefix="[INSPIRATION_PULSE // 10] >"
+            speed={46}
+          />
+        </div>
       </div>
     </div>
   );
 };
-

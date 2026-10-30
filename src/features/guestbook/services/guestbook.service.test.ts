@@ -1,12 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createGuestbookService } from "./guestbook.service";
 
 describe("Guestbook Service", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("should create a guestbook service and fetch notes with limit", async () => {
+  it("should fetch notes with specified limit", async () => {
     const mockNotes = [
       {
         id: "note-1",
@@ -17,44 +16,34 @@ describe("Guestbook Service", () => {
       },
     ];
 
-    const mockSelect = vi.fn().mockReturnThis();
-    const mockOrder = vi.fn().mockReturnThis();
     const mockLimit = vi.fn().mockResolvedValue({
       data: mockNotes,
       error: null,
     });
+    const mockOrder = vi.fn().mockReturnValue({ limit: mockLimit });
+    const mockSelect = vi.fn().mockReturnValue({ order: mockOrder });
+    const mockFrom = vi.fn((_table?: string) => ({ select: mockSelect }));
 
     const mockClient = {
-      from: vi.fn(() => ({
-        select: mockSelect,
-        order: mockOrder,
-        limit: mockLimit,
-      })),
-      channel: vi.fn(() => ({
-        on: vi.fn().mockReturnThis(),
-        subscribe: vi.fn(),
-        unsubscribe: vi.fn(),
-      })),
+      from: mockFrom,
     };
 
-    // Instantiate with mock config
     const service = {
       async getNotes(limit = 12) {
         const { data, error } = await mockClient
           .from("guestbook_notes")
-          .select()
+          .select("id,author,message,email,site_url,github_url,avatar_url,created_at,user_id")
           .order("created_at", { ascending: false })
           .limit(limit);
         if (error) throw new Error("Failed");
         return data;
       },
-      subscribeToNotes: vi.fn(),
     };
 
     const notes = await service.getNotes(5);
     expect(notes).toHaveLength(1);
     expect(notes[0].author).toBe("Chell");
+    expect(mockFrom).toHaveBeenCalledWith("guestbook_notes");
     expect(mockLimit).toHaveBeenCalledWith(5);
   });
 });
-

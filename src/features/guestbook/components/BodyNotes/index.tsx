@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import type { GuestbookNote } from "../../types";
 import { NoteCard } from "../NoteCard";
+import { DashedFrame } from "../DashedFrame";
 
 type BodyNotesProps = {
   notes: GuestbookNote[];
@@ -11,9 +12,10 @@ type BodyNotesProps = {
 
 const SkeletonCard = ({ index }: { index: number }) => (
   <div
-    className="animate-pulse border-2 border-dashed border-amber-500/40 bg-black/60 p-6 min-h-[260px] flex flex-col justify-between"
+    className="relative animate-pulse bg-black/60 p-6 min-h-[260px] flex flex-col justify-between"
     style={{ animationDelay: `${index * 0.15}s` }}
   >
+    <DashedFrame dash={15} gap={11} strokeWidth={2} className="stroke-amber-500/40" />
     <div className="space-y-3">
       <div className="h-4 w-32 bg-amber-500/20" />
       <div className="h-3 w-48 bg-amber-500/15" />
@@ -40,7 +42,8 @@ export const BodyNotes = ({ notes, isLoading }: BodyNotesProps) => {
 
   if (notes.length === 0) {
     return (
-      <div className="border-2 border-dashed border-amber-500/60 bg-black/80 px-6 py-16 text-center">
+      <div className="relative bg-black/80 px-6 py-16 text-center">
+        <DashedFrame dash={15} gap={11} strokeWidth={2} className="stroke-amber-500/60" />
         <p className="font-mono text-sm uppercase tracking-[0.3em] text-amber-400">
           [ REGISTRO // VACÍO ]
         </p>
