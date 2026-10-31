@@ -27,6 +27,8 @@ const config: Config = {
         sans: ["var(--font-geist-sans)", "Inter", "sans-serif"],
         mono: ["var(--font-geist-mono)", "JetBrains Mono", "monospace"],
         serif: ["var(--font-playfair)", "Playfair Display", "Newsreader", "Georgia", "serif"],
+        oswald: ["var(--font-oswald)", "Oswald", "sans-serif"],
+        raleway: ["var(--font-raleway)", "Raleway", "sans-serif"],
       },
 
       animation: {
