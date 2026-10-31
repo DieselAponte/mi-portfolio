@@ -26,6 +26,7 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-geist-sans)", "Inter", "sans-serif"],
         mono: ["var(--font-geist-mono)", "JetBrains Mono", "monospace"],
+        serif: ["var(--font-playfair)", "Playfair Display", "Newsreader", "Georgia", "serif"],
       },
 
       animation: {
